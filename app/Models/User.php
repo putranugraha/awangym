@@ -14,10 +14,11 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\PasskeyUser;
 use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
- * @property int $id
- * @property string $name
+ * @property int $user_id
+ * @property string $full_name
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
@@ -28,12 +29,24 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'full_name', 'email', 'phone', 'password', 'account_status'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, HasRoles, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+
+    protected $primaryKey = 'user_id';
+
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    public function setNameAttribute(string $value): void
+    {
+        $this->attributes['full_name'] = $value;
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -53,10 +66,20 @@ class User extends Authenticatable implements PasskeyUser
      */
     public function initials(): string
     {
-        $initials = Str::initials($this->name, true);
+        $initials = Str::initials($this->full_name, true);
 
         return Str::length($initials) > 1
             ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
+    }
+
+    public function member()
+    {
+        return $this->hasOne(Member::class, 'user_id');
+    }
+
+    public function personalTrainer()
+    {
+        return $this->hasOne(PersonalTrainer::class, 'user_id');
     }
 }

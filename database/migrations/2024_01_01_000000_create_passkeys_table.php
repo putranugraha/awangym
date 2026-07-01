@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('passkeys', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')->references('user_id')->on('users')->cascadeOnDelete();
             $table->string('name');
             $table->string('credential_id')->unique();
             $table->json('credential');

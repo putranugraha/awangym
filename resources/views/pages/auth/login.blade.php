@@ -1,59 +1,53 @@
-<x-layouts::auth :title="__('Log in')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+<x-layouts::auth title="Masuk">
+    <div class="auth-card">
+        <header class="auth-card-header">
+            <span class="auth-kicker">SELAMAT DATANG</span>
+            <h2>Masuk ke akun Anda</h2>
+            <p>Akses membership dan latihan Anda dengan aman.</p>
+        </header>
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
+        <x-auth-session-status class="auth-session-status" :status="session('status')" />
 
-        <x-passkey-verify />
-
-        <form method="POST" action="{{ route('login.store') }}" class="flex flex-col gap-6">
+        <form method="POST" action="{{ route('login.store') }}" class="auth-form">
             @csrf
 
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autofocus
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
+            <label class="auth-field">
+                <span>Email</span>
+                <span class="auth-input-wrap">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6h16v12H4zM4 7l8 6 8-6"/></svg>
+                    <input name="email" value="{{ old('email') }}" type="email" required autofocus autocomplete="email" placeholder="nama@email.com">
+                </span>
+                @error('email')<small class="auth-error">{{ $message }}</small>@enderror
+            </label>
 
-            <!-- Password -->
-            <div class="relative">
-                <flux:input
-                    name="password"
-                    :label="__('Password')"
-                    type="password"
-                    required
-                    autocomplete="current-password"
-                    :placeholder="__('Password')"
-                    viewable
-                />
+            <label class="auth-field">
+                <span class="auth-label-row">
+                    <span>Password</span>
+                    @if (Route::has('password.request'))
+                        <a href="{{ route('password.request') }}" wire:navigate>Lupa password?</a>
+                    @endif
+                </span>
+                <span class="auth-input-wrap">
+                    <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+                    <input name="password" type="password" required autocomplete="current-password" placeholder="Masukkan password">
+                </span>
+                @error('password')<small class="auth-error">{{ $message }}</small>@enderror
+            </label>
 
-                @if (Route::has('password.request'))
-                    <flux:link class="absolute top-0 text-sm end-0" :href="route('password.request')" wire:navigate>
-                        {{ __('Forgot your password?') }}
-                    </flux:link>
-                @endif
-            </div>
+            <label class="auth-check">
+                <input type="checkbox" name="remember" @checked(old('remember'))>
+                <span>Ingat saya</span>
+            </label>
 
-            <!-- Remember Me -->
-            <flux:checkbox name="remember" :label="__('Remember me')" :checked="old('remember')" />
-
-            <div class="flex items-center justify-end">
-                <flux:button variant="primary" type="submit" class="w-full" data-test="login-button">
-                    {{ __('Log in') }}
-                </flux:button>
-            </div>
+            <button type="submit" class="auth-submit" data-test="login-button">
+                <span>Masuk</span>
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+            </button>
         </form>
 
-        <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Don\'t have an account?') }}</span>
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+        <div class="auth-help">
+            <span>Belum memiliki akun?</span>
+            <strong>Hubungi admin Awan Gym</strong>
         </div>
     </div>
 </x-layouts::auth>

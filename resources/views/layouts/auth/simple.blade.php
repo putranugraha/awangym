@@ -1,22 +1,46 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('partials.head')
     </head>
-    <body class="min-h-screen bg-white antialiased dark:bg-linear-to-b dark:from-neutral-950 dark:to-neutral-900">
-        <div class="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-            <div class="flex w-full max-w-sm flex-col gap-2">
-                <a href="{{ route('home') }}" class="flex flex-col items-center gap-2 font-medium" wire:navigate>
-                    <span class="flex h-9 w-9 mb-1 items-center justify-center rounded-md">
-                        <x-app-logo-icon class="size-9 fill-current text-black dark:text-white" />
-                    </span>
-                    <span class="sr-only">{{ config('app.name', 'Laravel') }}</span>
+    <body class="auth-body">
+        <main class="auth-shell">
+            <section class="auth-visual" aria-label="Awan Gym">
+                <div class="auth-orb auth-orb-one"></div>
+                <div class="auth-orb auth-orb-two"></div>
+
+                <a href="{{ route('home') }}" class="auth-brand" wire:navigate>
+                    <span class="auth-brand-mark"><x-app-logo-icon /></span>
+                    <span><strong>AWAN</strong> GYM</span>
                 </a>
-                <div class="flex flex-col gap-6">
+
+                <div class="auth-hero">
+                    <span class="auth-kicker">BUILD YOUR STRONGEST SELF</span>
+                    <h1>Train Strong.<br><span>Stay Consistent.</span></h1>
+                    <p>Kelola membership dan program latihan dalam satu pengalaman yang sederhana.</p>
+
+                    <div class="auth-feature-row">
+                        <div><strong>01</strong><span>Status membership jelas</span></div>
+                        <div><strong>02</strong><span>Program latihan terarah</span></div>
+                    </div>
+                </div>
+
+                <p class="auth-visual-footer">AWAN GYM · STRONGER EVERY DAY</p>
+            </section>
+
+            <section class="auth-form-side">
+                <div class="auth-mobile-brand">
+                    <span class="auth-brand-mark"><x-app-logo-icon /></span>
+                    <span><strong>AWAN</strong> GYM</span>
+                </div>
+
+                <div class="auth-form-wrap">
                     {{ $slot }}
                 </div>
-            </div>
-        </div>
+
+                <p class="auth-copyright">© {{ date('Y') }} Awan Gym. All rights reserved.</p>
+            </section>
+        </main>
 
         @persist('toast')
             <flux:toast.group>

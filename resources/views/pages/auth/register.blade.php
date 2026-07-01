@@ -1,69 +1,27 @@
-<x-layouts::auth :title="__('Register')">
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+<x-layouts::auth title="Daftar">
+    <div class="auth-card">
+        <header class="auth-card-header">
+            <span class="auth-kicker">MULAI SEKARANG</span>
+            <h2>Buat akun Awan Gym</h2>
+            <p>Lengkapi data untuk memulai perjalanan latihan Anda.</p>
+        </header>
 
-        <!-- Session Status -->
-        <x-auth-session-status class="text-center" :status="session('status')" />
-
-        <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
-            @csrf
-            <!-- Name -->
-            <flux:input
-                name="name"
-                :label="__('Name')"
-                :value="old('name')"
-                type="text"
-                required
-                autofocus
-                autocomplete="name"
-                :placeholder="__('Full name')"
-            />
-
-            <!-- Email Address -->
-            <flux:input
-                name="email"
-                :label="__('Email address')"
-                :value="old('email')"
-                type="email"
-                required
-                autocomplete="email"
-                placeholder="email@example.com"
-            />
-
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
+        @if (Route::has('register.store'))
+            <form method="POST" action="{{ route('register.store') }}" class="auth-form">
+                @csrf
+                <label class="auth-field"><span>Nama lengkap</span><span class="auth-input-wrap"><input name="name" value="{{ old('name') }}" required autocomplete="name" placeholder="Nama lengkap"></span>@error('name')<small class="auth-error">{{ $message }}</small>@enderror</label>
+                <label class="auth-field"><span>Email</span><span class="auth-input-wrap"><input name="email" value="{{ old('email') }}" type="email" required autocomplete="email" placeholder="nama@email.com"></span>@error('email')<small class="auth-error">{{ $message }}</small>@enderror</label>
+                <label class="auth-field"><span>Password</span><span class="auth-input-wrap"><input name="password" type="password" required autocomplete="new-password" placeholder="Minimal 8 karakter"></span>@error('password')<small class="auth-error">{{ $message }}</small>@enderror</label>
+                <label class="auth-field"><span>Konfirmasi password</span><span class="auth-input-wrap"><input name="password_confirmation" type="password" required autocomplete="new-password" placeholder="Ulangi password"></span></label>
+                <button type="submit" class="auth-submit" data-test="register-user-button"><span>Buat Akun</span><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></button>
+            </form>
+        @else
+            <div class="auth-closed-registration">
+                <span>Registrasi dikelola oleh admin</span>
+                <p>Silakan datang atau hubungi Awan Gym untuk membuat akun membership.</p>
             </div>
-        </form>
+        @endif
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
-        </div>
+        <div class="auth-help"><span>Sudah memiliki akun?</span><a href="{{ route('login') }}" wire:navigate>Masuk sekarang</a></div>
     </div>
 </x-layouts::auth>
