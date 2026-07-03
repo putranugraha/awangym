@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class MembershipSubscription extends Model
@@ -13,6 +14,23 @@ class MembershipSubscription extends Model
     protected function casts(): array
     {
         return ['start_date' => 'date', 'end_date' => 'date'];
+    }
+
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query->whereHas(
+            'payment',
+            fn (Builder $payment) => $payment->where('payment_status', 'paid')
+        );
+    }
+
+    public function scopeCurrent(Builder $query): Builder
+    {
+        return $query
+            ->paid()
+            ->where('subscription_status', 'active')
+            ->whereDate('start_date', '<=', today())
+            ->whereDate('end_date', '>=', today());
     }
 
     public function member()

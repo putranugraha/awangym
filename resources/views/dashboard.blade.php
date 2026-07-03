@@ -1,4 +1,4 @@
-﻿<x-layouts::app :title="__('Dashboard')">
+<x-layouts::app :title="__('Dashboard')">
     <div class="awan-page">
         <header class="awan-header">
             <div>
@@ -34,7 +34,7 @@
                 <div class="section-title"><h2>Program latihan aktif</h2></div>
                 @forelse($member->programs as $assignment)
                     <article class="list-card">
-                        <div><span class="chip">{{ ucfirst($assignment->program->difficulty_level) }}</span><h3>{{ $assignment->program->program_name }}</h3><p>Trainer {{ $assignment->trainer->user->full_name }}</p></div>
+                        <div><span class="chip">{{ ucfirst($assignment->program->difficulty_level) }}</span><h3>{{ $assignment->program->program_name }}</h3><p>{{ $assignment->trainer ? 'Trainer '.$assignment->trainer->user->full_name : 'Latihan mandiri' }}</p></div>
                         <strong>{{ number_format($assignment->progress_percentage) }}%</strong>
                     </article>
                 @empty
@@ -46,7 +46,7 @@
                 <article class="metric-card"><span>Member binaan</span><strong>{{ $memberCount }}</strong></article>
                 <article class="metric-card accent"><span>Program aktif</span><strong>{{ $activePrograms }}</strong></article>
             </div>
-            <section class="empty-card"><h2>Kelola program latihan</h2><p>Buat program, susun latihan per hari, lalu tetapkan kepada member.</p></section>
+            <section class="empty-card"><h2>Pendampingan member</h2><p>Lihat member binaan dan validasi gerakan yang dilakukan bersama di gym.</p><a class="primary-btn" href="{{ route('trainer-members.index') }}">Buka Member Binaan</a></section>
         @else
             <section class="dashboard-welcome">
                 <div>
@@ -55,8 +55,8 @@
                     <p>Data membership dan pembayaran diperbarui dari transaksi terverifikasi.</p>
                 </div>
                 <div class="dashboard-quick-actions">
-                    <a href="{{ route('admin.members.create') }}" wire:navigate>+ Tambah Member</a>
-                    <a href="{{ route('admin.transactions.create') }}" wire:navigate>+ Buat Transaksi</a>
+                    <a href="{{ route('members.create') }}" wire:navigate>+ Tambah Member</a>
+                    <a href="{{ route('transactions.create') }}" wire:navigate>+ Buat Transaksi</a>
                 </div>
             </section>
 
@@ -126,7 +126,7 @@
 
             <div class="dashboard-chart-grid">
                 <section class="dashboard-panel dashboard-panel-wide">
-                    <div class="dashboard-panel-head"><div><span>KEUANGAN</span><h2>Tren Pendapatan</h2></div><a href="{{ route('admin.reports') }}">Lihat laporan</a></div>
+                    <div class="dashboard-panel-head"><div><span>KEUANGAN</span><h2>Tren Pendapatan</h2></div><a href="{{ route('reports.index') }}">Lihat laporan</a></div>
                     <div class="chart-box"><canvas data-dashboard-chart='@json($revenueConfig)'></canvas></div>
                 </section>
                 <section class="dashboard-panel">
@@ -137,10 +137,10 @@
 
             <div class="dashboard-bottom-grid">
                 <section class="dashboard-panel">
-                    <div class="dashboard-panel-head"><div><span>MEMBER</span><h2>Member Terbaru</h2></div><a href="{{ route('admin.members') }}">Lihat semua</a></div>
+                    <div class="dashboard-panel-head"><div><span>MEMBER</span><h2>Member Terbaru</h2></div><a href="{{ route('members.index') }}">Lihat semua</a></div>
                     <div class="dashboard-list">
                         @forelse($recentMembers as $item)
-                            <a href="{{ route('admin.members.edit', $item) }}" class="dashboard-list-item" wire:navigate>
+                            <a href="{{ route('members.edit', $item) }}" class="dashboard-list-item" wire:navigate>
                                 <span class="mini-avatar">{{ $item->user->initials() }}</span>
                                 <span class="grow"><strong>{{ $item->user->full_name }}</strong><small>{{ $item->member_code }} · Terdaftar {{ $item->registered_at->format('d M Y') }}</small></span>
                                 <span class="dashboard-arrow">→</span>
@@ -152,10 +152,10 @@
                 </section>
 
                 <section class="dashboard-panel">
-                    <div class="dashboard-panel-head"><div><span>AKTIVITAS</span><h2>Transaksi Terbaru</h2></div><a href="{{ route('admin.transactions') }}">Lihat semua</a></div>
+                    <div class="dashboard-panel-head"><div><span>AKTIVITAS</span><h2>Transaksi Terbaru</h2></div><a href="{{ route('transactions.index') }}">Lihat semua</a></div>
                     <div class="dashboard-list">
                         @forelse($recentTransactions as $transaction)
-                            <a href="{{ route('admin.transactions.edit', $transaction) }}" class="dashboard-list-item" wire:navigate>
+                            <a href="{{ route('transactions.edit', $transaction) }}" class="dashboard-list-item" wire:navigate>
                                 <span class="transaction-dot transaction-dot-{{ $transaction->payment_status }}"></span>
                                 <span class="grow"><strong>{{ $transaction->member->user->full_name }}</strong><small>{{ $transaction->invoice_number }} · {{ $transaction->subscription->package->package_name }}</small></span>
                                 <span class="transaction-value">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</span>
@@ -169,4 +169,5 @@
         @endif
     </div>
 </x-layouts::app>
+
 

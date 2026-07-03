@@ -72,11 +72,12 @@ Informasi minimum yang wajib terlihat jelas di kartu:
 
 ### 3.4 Program latihan
 
-1. Personal trainer membuat daftar gerakan latihan bila belum tersedia.
-2. Personal trainer membuat program latihan, memilih level dan target program.
-3. Personal trainer menambahkan detail gerakan per hari latihan.
-4. Personal trainer menetapkan program kepada satu atau beberapa member melalui `member_programs`.
-5. Member melihat program yang aktif dengan format ramah ponsel: per minggu/hari, card atau accordion, bukan tabel lebar.
+1. Sistem menyediakan katalog exercise dan program Gym Beginner serta Gym Strength melalui seeder.
+2. Admin menetapkan satu program aktif kepada member dan dapat memilih personal trainer secara opsional.
+3. Member tanpa personal trainer tetap dapat menjalankan dan melihat program secara mandiri.
+4. Personal trainer hanya melihat member yang ditugaskan kepadanya dan memvalidasi gerakan yang dilakukan bersama.
+5. Sistem tidak mencatat beban atau repetisi aktual; validasi PT hanya berupa checklist selesai.
+6. Member melihat program dengan format ramah ponsel: per minggu/hari, card atau accordion, bukan tabel lebar.
 
 ### 3.5 Keuangan
 
@@ -170,7 +171,7 @@ Gunakan nama tabel dan relasi ini. Field audit `created_at` dan `updated_at` dig
 |---|---|---|
 | `package_id` | PK | Identitas paket |
 | `package_name` | varchar(100) | Nama paket |
-| `duration_days` | integer | Durasi paket dalam hari |
+| `duration_months` | integer | Durasi paket dalam bulan |
 | `price` | decimal(12,2) | Harga paket |
 | `description` | text, nullable | Keterangan paket |
 | `package_status` | enum | `active`, `inactive` |
@@ -229,12 +230,14 @@ Gunakan nama tabel dan relasi ini. Field audit `created_at` dan `updated_at` dig
 | Field | Tipe/aturan | Keterangan |
 |---|---|---|
 | `program_id` | PK | Identitas program |
-| `trainer_id` | FK -> `personal_trainers.trainer_id` | Pembuat program |
+| `program_code` | varchar(50), unique | Kode katalog program |
 | `program_name` | varchar(150) | Nama program |
 | `target_goal` | varchar(100) | Contoh: weight loss, muscle gain |
 | `difficulty_level` | enum | `beginner`, `intermediate`, `advanced` |
 | `duration_weeks` | integer | Durasi dalam minggu |
 | `description` | text | Penjelasan program |
+| `source_name` | varchar(255), nullable | Referensi sumber program |
+| `source_reference` | varchar(255), nullable | Bagian sumber yang diadaptasi |
 | `program_status` | enum | `active`, `inactive` |
 | `created_at` | timestamp | Audit |
 | `updated_at` | timestamp | Audit |
@@ -247,11 +250,13 @@ Gunakan nama tabel dan relasi ini. Field audit `created_at` dan `updated_at` dig
 | `program_id` | FK -> `workout_programs.program_id` | Program terkait |
 | `exercise_id` | FK -> `exercises.exercise_id` | Gerakan terkait |
 | `training_day` | integer | Hari latihan keberapa |
+| `session_name` | varchar(100), nullable | Nama sesi latihan |
 | `sequence_order` | integer | Urutan gerakan |
 | `sets` | integer, nullable | Jumlah set |
 | `repetitions` | varchar(50), nullable | Contoh: `10–12` |
 | `duration_minutes` | integer, nullable | Durasi bila berbasis waktu |
 | `rest_seconds` | integer, nullable | Istirahat |
+| `intensity` | varchar(100), nullable | Panduan intensitas |
 | `notes` | text, nullable | Catatan |
 
 ### 5.10 `member_programs`
@@ -261,7 +266,7 @@ Gunakan nama tabel dan relasi ini. Field audit `created_at` dan `updated_at` dig
 | `member_program_id` | PK | Identitas program yang ditetapkan |
 | `member_id` | FK -> `members.member_id` | Member penerima |
 | `program_id` | FK -> `workout_programs.program_id` | Program latihan |
-| `trainer_id` | FK -> `personal_trainers.trainer_id` | Trainer penanggung jawab |
+| `trainer_id` | FK nullable -> `personal_trainers.trainer_id` | PT pendamping opsional |
 | `assigned_date` | date | Tanggal program diberikan |
 | `start_date` | date | Mulai program |
 | `end_date` | date, nullable | Akhir program |
@@ -270,6 +275,19 @@ Gunakan nama tabel dan relasi ini. Field audit `created_at` dan `updated_at` dig
 | `trainer_notes` | text, nullable | Catatan trainer |
 | `created_at` | timestamp | Audit |
 | `updated_at` | timestamp | Audit |
+
+### 5.11 `member_exercise_checks`
+
+Checklist sederhana untuk validasi gerakan oleh PT. Tidak menyimpan beban atau repetisi aktual.
+
+| Field | Tipe/aturan | Keterangan |
+|---|---|---|
+| `check_id` | PK | Identitas validasi |
+| `member_program_id` | FK | Assignment program member |
+| `program_exercise_id` | FK | Jadwal exercise yang divalidasi |
+| `validated_by` | FK -> `personal_trainers.trainer_id` | PT yang mendampingi |
+| `validated_at` | timestamp | Waktu validasi |
+| `notes` | text, nullable | Catatan singkat |
 
 ## 6. Relasi Data
 
@@ -339,9 +357,9 @@ Ketika halaman dibuka, sistem harus tetap memperlakukan membership yang melewati
 
 - Dashboard
 - Daftar member binaan
-- Daftar/buat/edit program latihan
-- Detail program dan latihan
-- Penetapan program kepada member
+- Katalog program latihan
+- Daftar member binaan
+- Checklist validasi gerakan member
 - Profil
 
 ## 9. Prioritas Implementasi

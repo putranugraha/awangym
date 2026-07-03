@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Member;
 use App\Models\MembershipSubscription;
 use App\Models\PaymentTransaction;
-use App\Models\WorkoutProgram;
 use App\Services\MembershipStatusService;
 
 class DashboardController extends Controller
@@ -20,7 +19,11 @@ class DashboardController extends Controller
                 'payments' => fn ($q) => $q->latest('created_at')->limit(3),
                 'programs' => fn ($q) => $q->with(['program', 'trainer.user'])->where('program_status', 'active'),
             ])->firstOrFail();
-            $subscription = $member->subscriptions->first();
+            $subscription = $member->subscriptions()
+                ->with(['package', 'payment'])
+                ->current()
+                ->latest('end_date')
+                ->first();
 
             return view('dashboard', compact('member', 'subscription') + ['membershipStatus' => $statusService->resolve($subscription)]);
         }
@@ -30,7 +33,7 @@ class DashboardController extends Controller
 
             return view('dashboard', [
                 'trainer' => $trainer,
-                'activePrograms' => WorkoutProgram::where('trainer_id', $trainer->trainer_id)->where('program_status', 'active')->count(),
+                'activePrograms' => $trainer->memberPrograms()->where('program_status', 'active')->count(),
                 'memberCount' => $trainer->memberPrograms()->where('program_status', 'active')->distinct('member_id')->count('member_id'),
             ]);
         }

@@ -29,4 +29,9 @@ class MemberProgram extends Model
     {
         return $this->belongsTo(PersonalTrainer::class, 'trainer_id');
     }
+
+    public function checks()
+    {
+        return $this->hasMany(MemberExerciseCheck::class, 'member_program_id');
+    }
 }

@@ -10,17 +10,22 @@ class MemberPortalController extends Controller
     {
         $member = auth()->user()->member;
         $subscriptions = $member->subscriptions()->with(['package', 'payment'])->latest('end_date')->get();
+        $currentSubscription = $member->subscriptions()
+            ->with(['package', 'payment'])
+            ->current()
+            ->latest('end_date')
+            ->first();
 
-        return view('membership.index', ['member' => $member, 'subscriptions' => $subscriptions, 'status' => $service->resolve($subscriptions->first())]);
+        return view('membership.index', [
+            'member' => $member,
+            'subscriptions' => $subscriptions,
+            'currentSubscription' => $currentSubscription,
+            'status' => $service->resolve($currentSubscription),
+        ]);
     }
 
     public function payments()
     {
         return view('payments.index', ['payments' => auth()->user()->member->payments()->with('subscription.package')->latest('created_at')->paginate(15)]);
-    }
-
-    public function programs()
-    {
-        return view('workout-programs.member-index', ['assignments' => auth()->user()->member->programs()->with(['program.exercises.exercise', 'trainer.user'])->latest('assigned_date')->get()]);
     }
 }

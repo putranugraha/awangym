@@ -15,22 +15,42 @@
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
-                    @role('admin')
-                    <flux:sidebar.item icon="users" :href="route('admin.members')" :current="request()->routeIs('admin.members*')">Member</flux:sidebar.item>
-                    <flux:sidebar.item icon="credit-card" :href="route('admin.transactions')" :current="request()->routeIs('admin.transactions*')">Transaksi</flux:sidebar.item>
-                    <flux:sidebar.item icon="archive-box" :href="route('admin.packages')" :current="request()->routeIs('admin.packages*')">Paket</flux:sidebar.item>
-                    <flux:sidebar.item icon="user-group" :href="route('admin.trainers')" :current="request()->routeIs('admin.trainers*')">Trainer</flux:sidebar.item>
-                    <flux:sidebar.item icon="chart-bar" :href="route('admin.reports')" :current="request()->routeIs('admin.reports')">Laporan</flux:sidebar.item>
-                    @endrole
-                    @role('member')
-                    <flux:sidebar.item icon="identification" :href="route('member.membership')" :current="request()->routeIs('member.membership')">Membership</flux:sidebar.item>
-                    <flux:sidebar.item icon="bolt" :href="route('member.programs')" :current="request()->routeIs('member.programs')">Program</flux:sidebar.item>
-                    <flux:sidebar.item icon="credit-card" :href="route('member.payments')" :current="request()->routeIs('member.payments')">Pembayaran</flux:sidebar.item>
-                    @endrole
-                    @role('personal_trainer')
-                    <flux:sidebar.item icon="clipboard-document-list" :href="route('trainer.programs')" :current="request()->routeIs('trainer.programs*')">Program</flux:sidebar.item>
-                    <flux:sidebar.item icon="bolt" :href="route('trainer.exercises')" :current="request()->routeIs('trainer.exercises*')">Latihan</flux:sidebar.item>
-                    @endrole
+                    @can('manage users')
+                    <flux:sidebar.item icon="user-circle" :href="route('users.index')" :current="request()->routeIs('users.*')">User</flux:sidebar.item>
+                    @endcan
+                    @can('manage roles and permissions')
+                    <flux:sidebar.item icon="shield-check" :href="route('roles.index')" :current="request()->routeIs('roles.*')">Role</flux:sidebar.item>
+                    @endcan
+                    @can('manage members')
+                    <flux:sidebar.item icon="users" :href="route('members.index')" :current="request()->routeIs('members.*')">Member</flux:sidebar.item>
+                    @endcan
+                    @can('manage payments')
+                    <flux:sidebar.item icon="credit-card" :href="route('transactions.index')" :current="request()->routeIs('transactions.*')">Transaksi</flux:sidebar.item>
+                    @endcan
+                    @can('manage packages')
+                    <flux:sidebar.item icon="archive-box" :href="route('packages.index')" :current="request()->routeIs('packages.*')">Paket</flux:sidebar.item>
+                    @endcan
+                    @can('manage trainers')
+                    <flux:sidebar.item icon="user-group" :href="route('personal-trainers.index')" :current="request()->routeIs('personal-trainers.*')">Trainer</flux:sidebar.item>
+                    @endcan
+                    @can('view reports')
+                    <flux:sidebar.item icon="chart-bar" :href="route('reports.index')" :current="request()->routeIs('reports.index')">Laporan</flux:sidebar.item>
+                    @endcan
+                    @can('view own membership')
+                    <flux:sidebar.item icon="identification" :href="route('membership.show')" :current="request()->routeIs('membership.show')">Membership</flux:sidebar.item>
+                    @endcan
+                    @can('view own workout program')
+                    <flux:sidebar.item icon="bolt" :href="route('my-program.index')" :current="request()->routeIs('my-program.index')">Program</flux:sidebar.item>
+                    @endcan
+                    @can('view own payments')
+                    <flux:sidebar.item icon="credit-card" :href="route('payments.index')" :current="request()->routeIs('payments.index')">Pembayaran</flux:sidebar.item>
+                    @endcan
+                    @can('view workout catalog')
+                    <flux:sidebar.item icon="clipboard-document-list" :href="route('workout-programs.index')" :current="request()->routeIs('workout-programs.*')">Program</flux:sidebar.item>
+                    @endcan
+                    @can('view assigned members')
+                    <flux:sidebar.item icon="users" :href="route('trainer-members.index')" :current="request()->routeIs('trainer-members.*')">Member Binaan</flux:sidebar.item>
+                    @endcan
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -105,3 +125,4 @@
         @fluxScripts
     </body>
 </html>
+

@@ -8,7 +8,7 @@ class MembershipPackage extends Model
 {
     protected $primaryKey = 'package_id';
 
-    protected $fillable = ['package_name', 'duration_days', 'price', 'description', 'package_status'];
+    protected $fillable = ['package_name', 'duration_months', 'price', 'description', 'package_status'];
 
     protected function casts(): array
     {

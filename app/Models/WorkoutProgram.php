@@ -8,12 +8,7 @@ class WorkoutProgram extends Model
 {
     protected $primaryKey = 'program_id';
 
-    protected $fillable = ['trainer_id', 'program_name', 'target_goal', 'difficulty_level', 'duration_weeks', 'description', 'program_status'];
-
-    public function trainer()
-    {
-        return $this->belongsTo(PersonalTrainer::class, 'trainer_id');
-    }
+    protected $fillable = ['program_code', 'program_name', 'target_goal', 'difficulty_level', 'duration_weeks', 'description', 'source_name', 'source_reference', 'program_status'];
 
     public function exercises()
     {

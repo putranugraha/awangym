@@ -10,7 +10,7 @@ class ProgramExercise extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['program_id', 'exercise_id', 'training_day', 'sequence_order', 'sets', 'repetitions', 'duration_minutes', 'rest_seconds', 'notes'];
+    protected $fillable = ['program_id', 'exercise_id', 'training_day', 'session_name', 'sequence_order', 'sets', 'repetitions', 'duration_minutes', 'rest_seconds', 'intensity', 'notes'];
 
     public function program()
     {
@@ -20,5 +20,10 @@ class ProgramExercise extends Model
     public function exercise()
     {
         return $this->belongsTo(Exercise::class, 'exercise_id');
+    }
+
+    public function checks()
+    {
+        return $this->hasMany(MemberExerciseCheck::class, 'program_exercise_id');
     }
 }

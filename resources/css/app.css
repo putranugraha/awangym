@@ -137,6 +137,116 @@
     .package-name-cell { @apply flex min-w-56 items-center gap-3; }.package-name-cell>span:last-child { @apply min-w-0; }.package-name-cell strong { @apply block font-semibold text-gray-900; }.package-name-cell small { @apply mt-1 block max-w-64 truncate text-xs text-gray-500; }.package-icon { @apply grid size-10 shrink-0 place-items-center rounded-xl bg-red-50 text-sm font-extrabold text-red-700; }
     .package-duration { @apply text-xl font-extrabold text-gray-900; }.package-price { @apply whitespace-nowrap text-sm text-gray-900; }.usage-count { @apply inline-grid min-w-9 place-items-center rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-extrabold text-gray-700; }.usage-count-active { @apply bg-green-50 text-green-700; }
     .package-status { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-bold; }.package-status i { @apply size-1.5 rounded-full bg-current; }.package-status-active { @apply bg-green-50 text-green-700; }.package-status-inactive { @apply bg-gray-100 text-gray-600; }
+    .trainer-stats { @apply grid grid-cols-2 gap-3 xl:grid-cols-4; }.trainer-stats article { @apply rounded-2xl border border-gray-200 bg-white p-4 shadow-sm; }.trainer-stats span { @apply block text-xs font-medium text-gray-500; }.trainer-stats strong { @apply mt-2 block text-2xl font-extrabold; }.trainer-stats small { @apply mt-1 block text-[10px] text-gray-400; }.trainer-stat-featured { color:white!important;border-color:transparent!important;background:linear-gradient(135deg,#a90f20,#e52335)!important; }.trainer-stat-featured span,.trainer-stat-featured small { color:rgba(255,255,255,.7); }
+    .trainer-cell { @apply min-w-52; }.trainer-table-photo { @apply size-10 shrink-0 rounded-xl object-cover; }.trainer-count { @apply inline-grid min-w-9 place-items-center rounded-lg bg-red-50 px-2 py-1.5 text-xs font-extrabold text-red-700; }.trainer-count-member { @apply bg-blue-50 text-blue-700; }
+    .account-status { @apply inline-flex whitespace-nowrap rounded-lg px-2.5 py-1.5 text-[11px] font-bold; }.account-status-active { @apply bg-green-50 text-green-700; }.account-status-inactive { @apply bg-gray-100 text-gray-600; }.table-action-danger { @apply bg-red-50 text-red-700 hover:bg-red-100; }
+    .form-page-header { @apply flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between; }.form-page-header h1 { @apply mt-1 text-2xl font-extrabold tracking-tight; }.form-page-header p { @apply mt-1 text-sm text-gray-500; }
+    .form-layout { @apply grid items-start gap-4 lg:grid-cols-5; }.form-layout>.form-card { @apply lg:col-span-3; }.form-side-stack { @apply grid gap-4 lg:col-span-2; }.form-section-title { @apply mb-1 flex items-start gap-3 border-b border-gray-100 pb-4; }.form-section-title>span { @apply grid size-8 shrink-0 place-items-center rounded-lg bg-red-50 text-xs font-extrabold text-red-700; }.form-section-title h2 { @apply font-bold text-gray-900; }.form-section-title p { @apply text-xs text-gray-500; }.form-card label em { @apply not-italic text-red-600; }
+    .member-section-gap { @apply mt-3; }
+    .member-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .transaction-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .package-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .trainer-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .assignment-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .user-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .access-form-main label>span:first-child { @apply inline-flex items-center gap-1; }
+    .member-progress-card { @apply gap-5; }
+    .member-progress-head>div:first-child { @apply mb-2 flex items-center justify-between gap-3; }
+    .member-progress-head span { @apply text-sm font-semibold text-gray-700; }
+    .member-progress-head strong { @apply text-xs font-bold text-red-600; }
+    .member-progress-track { @apply h-2 overflow-hidden rounded-full bg-gray-100; }
+    .member-progress-track i { @apply block h-full rounded-full bg-red-500 transition-all duration-300; }
+    .member-checklist { @apply grid gap-4; }
+    .member-checklist li { @apply flex items-center gap-3 text-gray-500; }
+    .member-checklist li>i { @apply grid size-8 shrink-0 place-items-center rounded-full border border-gray-200 bg-white text-xs font-bold not-italic; }
+    .member-checklist li>span { @apply grid min-w-0; }
+    .member-checklist li strong { @apply text-sm font-semibold text-gray-700; }
+    .member-checklist li small { @apply text-xs text-gray-500; }
+    .member-checklist li.is-complete>i { @apply border-green-500 bg-green-500 text-white; }
+    .member-checklist li.is-complete strong { @apply text-gray-900; }
+    .member-form-note { @apply rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-950; }
+    .member-form-note p { @apply mt-1 text-xs leading-5 text-blue-800; }
+    .member-identity-card { @apply flex grid-cols-none items-center gap-3; }
+    .member-identity-avatar { @apply grid size-12 shrink-0 place-items-center rounded-full bg-red-50 font-bold text-red-700; }
+    .member-identity-card>div { @apply grid min-w-0 grow; }
+    .member-identity-card>div strong { @apply truncate text-sm; }
+    .member-identity-card>div small { @apply truncate text-xs text-gray-500; }
+    .member-back-desktop { @apply hidden sm:inline-flex; }
+    .member-back-mobile { @apply flex w-full justify-center sm:hidden; }
+    .transaction-edit-summary { @apply grid gap-4 rounded-xl border border-gray-200 bg-gray-50 p-4; }
+    .transaction-edit-summary dl { @apply grid gap-3 sm:grid-cols-3; }
+    .transaction-edit-summary dl div { @apply grid gap-1; }
+    .transaction-edit-summary dt { @apply text-xs font-medium text-gray-500; }
+    .transaction-edit-summary dd { @apply text-sm font-semibold text-gray-900; }
+    .package-preview-card { @apply flex grid-cols-none items-center gap-3; }
+    .package-preview-card>div { @apply grid min-w-0 grow; }
+    .package-preview-card>div strong { @apply truncate text-sm; }
+    .package-preview-card>div small { @apply truncate text-xs text-gray-500; }
+    .trainer-identity-card { @apply flex grid-cols-none items-center gap-3; }
+    .trainer-identity-card>div { @apply grid min-w-0 grow; }
+    .trainer-identity-card>div strong { @apply truncate text-sm; }
+    .trainer-identity-card>div small { @apply truncate text-xs text-gray-500; }
+    .report-period-filter { @apply grid min-w-52 gap-1 text-sm font-semibold text-gray-700; }
+    .report-toolbar { @apply items-end; }
+    .report-toolbar h2 { @apply mt-1 font-bold text-gray-900; }
+    .report-stat-currency { @apply text-xl; }
+    .my-program-summary { @apply grid gap-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm; }
+    .my-program-summary-head { @apply flex items-start justify-between gap-4; }
+    .my-program-summary-head h2 { @apply mt-3 text-xl font-extrabold text-gray-900; }
+    .my-program-summary-head p { @apply mt-1 max-w-2xl text-sm leading-6 text-gray-500; }
+    .my-program-level { @apply rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700; }
+    .my-program-progress { @apply grid gap-2; }
+    .my-program-progress>div:first-child { @apply flex items-center justify-between gap-3 text-xs; }
+    .my-program-progress span { @apply font-semibold text-gray-600; }
+    .my-program-progress strong { @apply text-gray-900; }
+    .my-program-trainer,.my-program-period { @apply truncate text-sm!; }
+    .my-program-toolbar h2 { @apply mt-1 font-bold text-gray-900; }
+    .my-program-toolbar p { @apply mt-1 text-xs text-gray-500; }
+    .program-week>summary { list-style:none;cursor:pointer; }
+    .program-week>summary::-webkit-details-marker { display:none; }
+    .my-program-exercise-list { @apply divide-y divide-gray-100 px-4; }
+    .my-program-exercise { @apply grid grid-cols-[auto_1fr_auto] items-center gap-3 py-3; }
+    .my-program-exercise-order { @apply grid size-8 place-items-center rounded-lg bg-gray-100 text-xs font-bold text-gray-600; }
+    .my-program-exercise>div { @apply grid min-w-0; }
+    .my-program-exercise>div strong { @apply truncate text-sm text-gray-900; }
+    .my-program-exercise>div small { @apply text-xs text-gray-500; }
+    .my-program-validation { @apply rounded-full bg-gray-100 px-2.5 py-1 text-[10px] font-bold text-gray-600; }
+    .my-program-exercise.is-complete .my-program-exercise-order { @apply bg-green-500 text-white; }
+    .my-program-exercise.is-complete .my-program-validation { @apply bg-green-50 text-green-700; }
+    .program-catalog-grid { @apply grid gap-4 bg-gray-50 p-4 md:grid-cols-2 xl:grid-cols-3; }
+    .program-catalog-code { @apply mt-4 text-[10px] font-bold uppercase tracking-widest text-red-600; }
+    .program-catalog-target { @apply mt-4 grid gap-1 rounded-xl bg-gray-50 p-3; }
+    .program-catalog-target span { @apply text-[10px] font-semibold uppercase tracking-wide text-gray-500; }
+    .program-catalog-target strong { @apply text-sm text-gray-900; }
+    .program-catalog-footer { @apply mt-auto flex items-center justify-between gap-3 pt-4; }
+    .program-catalog-footer small { @apply min-w-0 truncate text-xs text-gray-500; }
+    .program-catalog-footer a { @apply shrink-0; }
+    .program-catalog-empty { @apply col-span-full rounded-xl bg-white; }
+    .assignment-member-card { @apply flex grid-cols-none items-center gap-3; }
+    .assignment-member-card>div { @apply grid min-w-0 grow; }
+    .assignment-member-card>div strong { @apply truncate text-sm; }
+    .assignment-member-card>div small { @apply truncate text-xs text-gray-500; }
+    .user-role-card,.user-identity-card { @apply flex grid-cols-none items-center gap-3; }
+    .user-role-card>div,.user-identity-card>div { @apply grid min-w-0 grow; }
+    .user-role-card>div strong,.user-identity-card>div strong { @apply truncate text-sm; }
+    .user-role-card>div small,.user-identity-card>div small { @apply truncate text-xs text-gray-500; }
+    .user-role { @apply inline-flex w-fit rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-700; }
+    .user-role-admin { @apply bg-red-50 text-red-700; }
+    .user-role-personal_trainer { @apply bg-blue-50 text-blue-700; }
+    .user-role-member { @apply bg-green-50 text-green-700; }
+    .permission-choice-grid { @apply grid gap-2 sm:grid-cols-2; }
+    .permission-choice-grid label { @apply flex cursor-pointer grid-cols-none items-center gap-3 rounded-xl border border-gray-200 p-3 text-sm font-medium transition hover:border-red-200 hover:bg-red-50/40; }
+    .permission-choice-grid input { @apply size-4 accent-red-600; }
+    .access-summary-card { @apply flex grid-cols-none items-center gap-3; }
+    .access-summary-card>div { @apply grid min-w-0 grow; }
+    .access-summary-card>div strong { @apply truncate text-sm; }
+    .access-summary-card>div small { @apply truncate text-xs text-gray-500; }
+    .file-input { @apply mt-2 block w-full cursor-pointer rounded-xl border border-dashed border-gray-300 bg-gray-50 p-3 text-xs text-gray-600 file:mr-3 file:rounded-lg file:border-0 file:bg-red-50 file:px-3 file:py-2 file:text-xs file:font-bold file:text-red-700; }.trainer-photo-preview { @apply h-44 w-full rounded-xl object-cover; }.current-trainer-photo { @apply mx-auto grid size-32 place-items-center overflow-hidden rounded-2xl bg-red-50 text-2xl font-extrabold text-red-700; }.current-trainer-photo img { @apply size-full object-cover; }.form-submit { @apply w-full; }
+    .header-actions { @apply flex flex-wrap gap-2; }.program-content-stats { @apply grid grid-cols-3 gap-3; }.program-content-stats article { @apply rounded-2xl border border-gray-200 bg-white p-4 shadow-sm; }.program-content-stats span { @apply block text-xs text-gray-500; }.program-content-stats strong { @apply mt-2 block text-2xl font-extrabold; }.program-content-stats small { @apply mt-1 block text-[10px] text-gray-400; }
+    .toolbar-title { @apply block text-sm font-bold text-gray-900; }.toolbar-description { @apply mt-1 text-xs text-gray-500; }.program-weeks { @apply grid gap-4 bg-gray-50 p-4; }.program-week { @apply overflow-hidden rounded-2xl border border-gray-200 bg-white; }.program-week-header { @apply flex items-center justify-between bg-gray-900 px-4 py-3 text-white; }.program-week-header span { @apply text-xs font-extrabold tracking-widest; }.program-week-header small { @apply text-xs text-white/60; }
+    .program-day { @apply border-t border-gray-100 first:border-0; }.program-day-header { @apply flex items-center justify-between bg-red-50/50 px-4 py-3; }.program-day-header strong { @apply block text-sm text-gray-900; }.program-day-header small { @apply text-xs text-gray-500; }.program-day-header>span { @apply rounded-full bg-white px-2.5 py-1 text-[10px] font-bold text-red-700; }
+    .sequence-badge { @apply inline-grid size-8 place-items-center rounded-lg bg-gray-900 text-xs font-extrabold text-white; }.exercise-name-cell { @apply min-w-40; }.exercise-name-cell strong { @apply block text-sm text-gray-900; }.exercise-category { @apply mb-1 block text-[9px] font-bold uppercase tracking-wider text-red-600; }.table-note { @apply block max-w-48 truncate text-xs text-gray-500; }.form-help { @apply rounded-xl bg-gray-50 p-3 text-xs leading-relaxed text-gray-500; }
+    .program-card-grid { @apply grid gap-4 md:grid-cols-2 xl:grid-cols-3; }.program-summary-card { @apply flex min-h-64 flex-col rounded-2xl border border-gray-200 bg-white p-5 shadow-sm; }.program-summary-top { @apply flex items-center justify-between; }.program-summary-card h2 { @apply mt-4 text-lg font-extrabold; }.program-summary-card>p { @apply mt-2 line-clamp-2 text-sm leading-relaxed text-gray-500; }.program-summary-meta { @apply mt-5 grid grid-cols-3 gap-2 border-y border-gray-100 py-4 text-center; }.program-summary-meta span { @apply text-[10px] text-gray-500; }.program-summary-meta strong { @apply block truncate text-sm text-gray-900; }.program-summary-actions { @apply mt-auto grid grid-cols-2 gap-2 pt-4; }.program-content-heading { @apply flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between; }.program-content-heading h2 { @apply mt-1 font-bold; }.program-content-heading p { @apply text-xs text-gray-500; }
 }
 
 @media (max-width: 900px) {
@@ -169,7 +279,23 @@
     .table-empty { @apply py-8; }.member-table td[colspan]::before { display:none; }
     .transaction-stats article { @apply min-w-0 p-3; }.transaction-stats strong { @apply truncate text-lg; }.transaction-stats span { @apply text-[10px]; }
     .transaction-filters { @apply grid grid-cols-2; }.transaction-filters .data-filter { @apply block; }.transaction-filters .data-filter span { @apply mb-1 block; }.transaction-filters select { @apply w-full; }
+    .verification-modal-content { @apply space-y-4; }
+    .verification-modal-heading { @apply space-y-1; }
+    .verification-member { @apply flex items-center gap-3 rounded-xl bg-gray-50 p-3; }
+    .verification-member div { @apply flex min-w-0 flex-col; }
+    .verification-member strong { @apply truncate text-sm text-gray-900; }
+    .verification-member small { @apply truncate text-xs text-gray-500; }
+    .verification-details { @apply divide-y divide-gray-100 rounded-xl border border-gray-200 px-4; }
+    .verification-details div { @apply flex items-start justify-between gap-4 py-3; }
+    .verification-details dt { @apply text-sm text-gray-500; }
+    .verification-details dd { @apply text-right text-sm font-semibold text-gray-900; }
+    .verification-details .verification-total dd { @apply text-lg font-bold text-red-600; }
+    .verification-actions { @apply grid grid-cols-2 gap-3 pt-1; }
+    .verification-actions button { @apply min-h-11 w-full; }
     .package-stats article { @apply min-w-0 p-3; }.package-stats span { @apply text-[10px]; }.package-stats strong { @apply truncate text-xl; }.package-stats .package-stat-currency { @apply text-base; }
+    .trainer-stats article { @apply min-w-0 p-3; }.trainer-stats span { @apply text-[10px]; }.trainer-stats strong { @apply text-xl; }
+    .program-content-stats article { @apply min-w-0 p-3; }.program-content-stats span { @apply text-[10px]; }.program-content-stats strong { @apply text-xl; }
+    .program-weeks { @apply p-2; }.program-day-header { @apply items-start; }.program-exercise-table td:first-child { @apply flex border-b-0 pb-2; }.program-exercise-table td:first-child::before { display:block; }
 }
 
 @media (prefers-reduced-motion: reduce) {

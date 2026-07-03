@@ -1,7 +1,7 @@
 <?php
 
 use App\Concerns\PasswordValidationRules;
-use App\Livewire\Actions\Logout;
+use App\Actions\Logout;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 

@@ -15,11 +15,6 @@ class PersonalTrainer extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function workoutPrograms()
-    {
-        return $this->hasMany(WorkoutProgram::class, 'trainer_id');
-    }
-
     public function memberPrograms()
     {
         return $this->hasMany(MemberProgram::class, 'trainer_id');
