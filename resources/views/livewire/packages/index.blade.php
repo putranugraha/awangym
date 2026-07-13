@@ -141,6 +141,7 @@ new class extends Component
                         <th>Nama Paket</th>
                         <th>Durasi</th>
                         <th>Harga</th>
+                        <th>Layanan PT</th>
                         <th>Subscription Aktif</th>
                         <th>Total Digunakan</th>
                         <th>Status</th>
@@ -163,9 +164,16 @@ new class extends Component
                                 <span class="package-duration">{{ $package->duration_months }}</span>
                                 <small class="table-secondary">bulan</small>
                             </td>
-                            <td data-label="Harga">
+                             <td data-label="Harga">
                                 <strong class="package-price">Rp {{ number_format($package->price, 0, ',', '.') }}</strong>
-                            </td>
+                             </td>
+                             <td data-label="Layanan PT">
+                                @if($package->has_trainer)
+                                    <span class="package-status package-status-active"><i></i>Dengan PT</span>
+                                @else
+                                    <span class="package-status package-status-inactive" style="color: var(--color-slate-500); background-color: var(--color-slate-100);">Gym Mandiri</span>
+                                @endif
+                             </td>
                             <td data-label="Subscription Aktif">
                                 <span class="usage-count usage-count-active">{{ $package->active_subscriptions_count }}</span>
                             </td>
@@ -197,7 +205,7 @@ new class extends Component
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                             <td colspan="8">
                                 <div class="table-empty">
                                     <strong>Paket tidak ditemukan</strong>
                                     <p>Coba ubah pencarian atau filter status.</p>

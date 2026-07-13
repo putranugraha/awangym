@@ -217,6 +217,9 @@ new class extends Component
                             <td data-label="Paket">
                                 <span class="table-primary">{{ $transaction->subscription->package->package_name }}</span>
                                 <small class="table-secondary">{{ $transaction->subscription->start_date->format('d M') }} – {{ $transaction->subscription->end_date->format('d M Y') }}</small>
+                                @if($transaction->subscription->trainer)
+                                    <small class="table-secondary" style="display: block; font-weight: 500; color: var(--color-primary);">PT: {{ $transaction->subscription->trainer->user->full_name }}</small>
+                                @endif
                             </td>
                             <td data-label="Metode">
                                 <span class="payment-method payment-method-{{ $transaction->payment_method }}">
@@ -304,6 +307,9 @@ new class extends Component
                 <dl class="verification-details">
                     <div><dt>Invoice</dt><dd>{{ $selectedTransaction->invoice_number }}</dd></div>
                     <div><dt>Paket membership</dt><dd>{{ $selectedTransaction->subscription->package->package_name }}</dd></div>
+                    @if($selectedTransaction->subscription->trainer)
+                        <div><dt>Trainer</dt><dd>{{ $selectedTransaction->subscription->trainer->user->full_name }}</dd></div>
+                    @endif
                     <div><dt>Metode</dt><dd>{{ match($selectedTransaction->payment_method) {'cash' => 'Tunai', 'e_wallet' => 'E-wallet', default => 'Transfer'} }}</dd></div>
                     <div class="verification-total"><dt>Nominal diterima</dt><dd>Rp {{ number_format($selectedTransaction->amount, 0, ',', '.') }}</dd></div>
                 </dl>

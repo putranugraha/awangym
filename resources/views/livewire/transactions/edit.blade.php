@@ -61,6 +61,9 @@ new class extends Component
                 <div class="member-cell"><span class="member-table-avatar">{{ $transaction->member->user->initials() }}</span><span><strong>{{ $transaction->member->user->full_name }}</strong><small>{{ $transaction->member->member_code }}</small></span></div>
                 <dl>
                     <div><dt>Paket</dt><dd>{{ $transaction->subscription->package->package_name }}</dd></div>
+                    @if($transaction->subscription->trainer)
+                        <div><dt>Trainer</dt><dd>{{ $transaction->subscription->trainer->trainer_code }} — {{ $transaction->subscription->trainer->user->full_name }}</dd></div>
+                    @endif
                     <div><dt>Nominal</dt><dd>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</dd></div>
                     <div><dt>Periode</dt><dd>{{ $transaction->subscription->start_date->format('d M Y') }} — {{ $transaction->subscription->end_date->format('d M Y') }}</dd></div>
                 </dl>

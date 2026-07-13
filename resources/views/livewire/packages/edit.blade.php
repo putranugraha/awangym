@@ -17,16 +17,25 @@ new class extends Component
 
     public int|string $price = '';
 
+    public bool $has_trainer = false;
+
     public function mount(MembershipPackage $package): void
     {
         $this->package = $package;
-        $this->fill($package->only(['package_name', 'duration_months', 'price', 'package_status']));
+        $this->fill($package->only(['package_name', 'duration_months', 'price', 'package_status', 'has_trainer']));
         $this->description = $package->description ?? '';
     }
 
     public function save(): void
     {
-        $data = $this->validate(['package_name' => ['required', 'max:100'], 'duration_months' => ['required', 'integer', 'min:1', 'max:60'], 'price' => ['required', 'numeric', 'min:0'], 'description' => ['nullable'], 'package_status' => ['required', 'in:active,inactive']]);
+        $data = $this->validate([
+            'package_name' => ['required', 'max:100'],
+            'duration_months' => ['required', 'integer', 'min:1', 'max:60'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'has_trainer' => ['boolean'],
+            'description' => ['nullable'],
+            'package_status' => ['required', 'in:active,inactive']
+        ]);
         $this->package->update($data);
         session()->flash('success', 'Paket berhasil diperbarui.');
         $this->redirectRoute('packages.index', navigate: true);
@@ -38,8 +47,9 @@ new class extends Component
 @php
     $identityComplete = filled($package_name);
     $pricingComplete = filled($duration_months) && $price !== '';
+    $trainerComplete = true;
     $statusComplete = filled($package_status);
-    $completedSections = collect([$identityComplete, $pricingComplete, $statusComplete])->filter()->count();
+    $completedSections = collect([$identityComplete, $pricingComplete, $trainerComplete, $statusComplete])->filter()->count();
 @endphp
 
 <div class="awan-page">
@@ -55,25 +65,34 @@ new class extends Component
 
             <div class="form-section-title member-section-gap"><span>02</span><div><h2>Durasi dan Harga</h2><p>Perbarui masa berlaku dan harga paket.</p></div></div>
             <div class="form-grid">
-                <label><span>Durasi (bulan) <em>*</em></span><input class="form-input" type="number" min="1" max="60" wire:model.live="duration_months" placeholder="Contoh: 1"></label>
-                <label><span>Harga <em>*</em></span><input class="form-input" type="number" min="0" wire:model.live="price" placeholder="Contoh: 150000"></label>
+                <label><span>Durasi (bulan) <em>*</em></span><input class="form-input" type="number" min="1" max="60" wire:model.live.debounce.300ms="duration_months" placeholder="Contoh: 1"></label>
+                <label><span>Harga <em>*</em></span><input class="form-input" type="number" min="0" wire:model.live.debounce.300ms="price" placeholder="Contoh: 150000"></label>
             </div>
 
-            <div class="form-section-title member-section-gap"><span>03</span><div><h2>Ketersediaan</h2><p>Atur apakah paket dapat dipilih saat transaksi.</p></div></div>
+            <div class="form-section-title member-section-gap"><span>03</span><div><h2>Personal Trainer</h2><p>Tentukan apakah paket ini termasuk layanan pendampingan trainer.</p></div></div>
+            <div style="margin-top: 1rem;">
+                <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                    <input type="checkbox" wire:model.live="has_trainer" style="width: 1.25rem; height: 1.25rem; accent-color: var(--color-primary);">
+                    <span><strong>Termasuk Personal Trainer</strong> (Member wajib didampingi trainer saat berlangganan paket ini)</span>
+                </label>
+            </div>
+
+            <div class="form-section-title member-section-gap"><span>04</span><div><h2>Ketersediaan</h2><p>Atur apakah paket dapat dipilih saat transaksi.</p></div></div>
             <label><span>Status <em>*</em></span><select class="form-input" wire:model.live="package_status"><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></label>
         </section>
         <aside class="form-side-stack">
             <section class="form-card package-preview-card">
                 <span class="package-icon">{{ strtoupper(substr($package_name ?: $package->package_name, 0, 1)) }}</span>
-                <div><strong>{{ $package_name ?: $package->package_name }}</strong><small>{{ $duration_months ?: 0 }} bulan · Rp {{ number_format((float) ($price ?: 0), 0, ',', '.') }}</small></div>
+                <div><strong>{{ $package_name ?: $package->package_name }}</strong><small>{{ $duration_months ?: 0 }} bulan · Rp {{ number_format((float) ($price ?: 0), 0, ',', '.') }}{{ $has_trainer ? ' · PT' : ' · Gym Mandiri' }}</small></div>
                 <span class="package-status package-status-{{ $package_status }}"><i></i>{{ $package_status === 'active' ? 'Aktif' : 'Nonaktif' }}</span>
             </section>
             <section class="form-card member-progress-card">
-                <div class="member-progress-head"><div><span>Kelengkapan paket</span><strong>{{ $completedSections }}/3 bagian</strong></div><div class="member-progress-track"><i style="width: {{ ($completedSections / 3) * 100 }}%"></i></div></div>
+                <div class="member-progress-head"><div><span>Kelengkapan paket</span><strong>{{ $completedSections }}/4 bagian</strong></div><div class="member-progress-track"><i style="width: {{ ($completedSections / 4) * 100 }}%"></i></div></div>
                 <ul class="member-checklist">
                     <li class="{{ $identityComplete ? 'is-complete' : '' }}"><i>{{ $identityComplete ? '✓' : '1' }}</i><span><strong>Informasi paket</strong><small>Nama paket membership</small></span></li>
                     <li class="{{ $pricingComplete ? 'is-complete' : '' }}"><i>{{ $pricingComplete ? '✓' : '2' }}</i><span><strong>Durasi dan harga</strong><small>Masa berlaku dan nominal</small></span></li>
-                    <li class="{{ $statusComplete ? 'is-complete' : '' }}"><i>{{ $statusComplete ? '✓' : '3' }}</i><span><strong>Ketersediaan</strong><small>Status paket</small></span></li>
+                    <li class="{{ $trainerComplete ? 'is-complete' : '' }}"><i>{{ $trainerComplete ? '✓' : '3' }}</i><span><strong>Personal Trainer</strong><small>Layanan pendampingan PT</small></span></li>
+                    <li class="{{ $statusComplete ? 'is-complete' : '' }}"><i>{{ $statusComplete ? '✓' : '4' }}</i><span><strong>Ketersediaan</strong><small>Status paket</small></span></li>
                 </ul>
             </section>
             @if($errors->any())<div class="error-box">{{ $errors->first() }}</div>@endif
