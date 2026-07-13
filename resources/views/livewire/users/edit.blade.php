@@ -1,8 +1,11 @@
 <?php
 
 use App\Models\User;
+use App\Models\PersonalTrainer;
+use App\Models\Member;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 new class extends Component
@@ -13,11 +16,13 @@ new class extends Component
     public string $phone = '';
     public string $password = '';
     public string $account_status = '';
+    public string $role_name = '';
 
     public function mount(User $user): void
     {
         $this->user = $user->load(['roles', 'member', 'personalTrainer']);
         $this->fill($user->only(['full_name', 'email', 'phone', 'account_status']));
+        $this->role_name = $user->roles->first()?->name ?? '';
     }
 
     public function save(): void
@@ -28,19 +33,70 @@ new class extends Component
             'phone' => ['required', 'string', 'max:20'],
             'password' => ['nullable', 'string', 'min:8'],
             'account_status' => ['required', 'in:active,inactive'],
+            'role_name' => ['required', 'exists:roles,name'],
         ]);
 
         if ($this->user->is(auth()->user()) && $data['account_status'] === 'inactive') {
             throw ValidationException::withMessages(['account_status' => 'Anda tidak dapat menonaktifkan akun yang sedang digunakan.']);
         }
 
-        if ($data['password'] === '') {
-            unset($data['password']);
+        $userData = [
+            'full_name' => $data['full_name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'account_status' => $data['account_status'],
+        ];
+
+        if (filled($data['password'])) {
+            $userData['password'] = $data['password'];
         }
-        $this->user->update($data);
+
+        $this->user->update($userData);
+        $this->user->syncRoles([$data['role_name']]);
+
+        if ($data['role_name'] === 'personal_trainer') {
+            if (!$this->user->personalTrainer()->exists()) {
+                $trainer = PersonalTrainer::create([
+                    'user_id' => $this->user->user_id,
+                    'trainer_code' => 'TMP-'.Str::upper(Str::random(12)),
+                    'bio' => '',
+                    'employment_status' => 'active',
+                ]);
+                $trainer->update([
+                    'trainer_code' => 'AGT-'.str_pad((string) $trainer->trainer_id, 3, '0', STR_PAD_LEFT),
+                ]);
+            }
+        } else {
+            $this->user->personalTrainer()->delete();
+        }
+
+        if ($data['role_name'] === 'member') {
+            if (!$this->user->member()->exists()) {
+                $member = Member::create([
+                    'user_id' => $this->user->user_id,
+                    'member_code' => 'TMP-'.Str::upper(Str::random(12)),
+                    'gender' => 'L',
+                    'birth_date' => '1995-01-01',
+                    'address' => 'Alamat Member',
+                    'registered_at' => today(),
+                ]);
+                $member->update([
+                    'member_code' => 'AGM-'.str_pad((string) $member->member_id, 3, '0', STR_PAD_LEFT),
+                ]);
+            }
+        } else {
+            $this->user->member()->delete();
+        }
 
         session()->flash('success', 'Data user berhasil diperbarui.');
         $this->redirectRoute('users.index', navigate: true);
+    }
+
+    public function with(): array
+    {
+        return [
+            'roles' => \Spatie\Permission\Models\Role::all(),
+        ];
     }
 };
 ?>
@@ -48,10 +104,9 @@ new class extends Component
 @php
     $identityComplete = filled($full_name) && filled($email) && filled($phone);
     $securityComplete = $password === '' || strlen($password) >= 8;
-    $statusComplete = filled($account_status);
+    $statusComplete = filled($account_status) && filled($role_name);
     $completedSections = collect([$identityComplete, $securityComplete, $statusComplete])->filter()->count();
-    $roleName = $user->roles->first()?->name;
-    $roleLabel = match($roleName) {'personal_trainer' => 'Personal Trainer', 'member' => 'Member', default => 'Administrator'};
+    $roleLabel = match($role_name) {'personal_trainer' => 'Personal Trainer', 'member' => 'Member', default => ucfirst($role_name)};
     $profileCode = $user->member?->member_code ?? $user->personalTrainer?->trainer_code ?? 'Akun operasional';
 @endphp
 
@@ -72,8 +127,11 @@ new class extends Component
             <div class="form-section-title member-section-gap"><span>02</span><div><h2>Keamanan Akun</h2><p>Ubah password hanya jika diperlukan.</p></div></div>
             <label><span>Password baru</span><input class="form-input" type="password" wire:model.live.debounce.300ms="password" placeholder="Kosongkan jika tidak diubah" autocomplete="new-password"></label>
 
-            <div class="form-section-title member-section-gap"><span>03</span><div><h2>Akses Akun</h2><p>Status menentukan apakah user dapat login.</p></div></div>
-            <label><span>Status akun <em>*</em></span><select class="form-input" wire:model.live="account_status"><option value="active">Aktif — dapat login</option><option value="inactive">Nonaktif — akses diblokir</option></select></label>
+            <div class="form-section-title member-section-gap"><span>03</span><div><h2>Akses Akun</h2><p>Tentukan role dan status login.</p></div></div>
+            <div class="form-grid">
+                <label><span>Role Akses <em>*</em></span><select class="form-input" wire:model.live="role_name"><option value="">Pilih role</option>@foreach($roles as $r)<option value="{{ $r->name }}">{{ ucfirst($r->name) }}</option>@endforeach</select></label>
+                <label><span>Status akun <em>*</em></span><select class="form-input" wire:model.live="account_status"><option value="active">Aktif — dapat login</option><option value="inactive">Nonaktif — akses diblokir</option></select></label>
+            </div>
         </section>
         <aside class="form-side-stack">
             <section class="form-card user-identity-card">

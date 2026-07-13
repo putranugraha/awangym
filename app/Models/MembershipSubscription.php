@@ -9,7 +9,7 @@ class MembershipSubscription extends Model
 {
     protected $primaryKey = 'subscription_id';
 
-    protected $fillable = ['member_id', 'package_id', 'created_by', 'subscription_type', 'start_date', 'end_date', 'subscription_status', 'notes'];
+    protected $fillable = ['member_id', 'package_id', 'trainer_id', 'created_by', 'subscription_type', 'start_date', 'end_date', 'subscription_status', 'notes'];
 
     protected function casts(): array
     {
@@ -31,6 +31,11 @@ class MembershipSubscription extends Model
             ->where('subscription_status', 'active')
             ->whereDate('start_date', '<=', today())
             ->whereDate('end_date', '>=', today());
+    }
+
+    public function trainer()
+    {
+        return $this->belongsTo(PersonalTrainer::class, 'trainer_id');
     }
 
     public function member()

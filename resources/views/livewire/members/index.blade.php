@@ -2,6 +2,7 @@
 
 use App\Models\Member;
 use App\Services\MembershipStatusService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,11 +14,46 @@ new class extends Component
 
     public string $status = 'all';
 
+    public bool $showDeleteModal = false;
+    public ?int $deletingId = null;
+
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'status'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->deletingId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteMember(): void
+    {
+        abort_unless(auth()->user()->can('manage members'), 403);
+        
+        $member = Member::findOrFail($this->deletingId);
+        $this->showDeleteModal = false;
+        
+        if ($member->subscriptions()->exists()) {
+            session()->flash('error', 'Member tidak dapat dihapus karena memiliki riwayat subscription.');
+            return;
+        }
+
+        if ($member->programs()->exists()) {
+            session()->flash('error', 'Member tidak dapat dihapus karena memiliki riwayat program latihan.');
+            return;
+        }
+
+        DB::transaction(function () use ($member) {
+            $user = $member->user;
+            $member->delete();
+            $user->delete();
+        });
+
+        session()->flash('success', 'Member berhasil dihapus.');
     }
 
     public function with(MembershipStatusService $statusService): array
@@ -75,7 +111,10 @@ new class extends Component
     </div>
 
     @if(session('success'))
-        <div class="notice">{{ session('success') }}</div>
+        <div x-data x-init="Flux.toast({ variant: 'success', text: '{{ session('success') }}' })"></div>
+    @endif
+    @if(session('error'))
+        <div x-data x-init="Flux.toast({ variant: 'danger', text: '{{ session('error') }}' })"></div>
     @endif
 
     <section class="data-panel">
@@ -149,17 +188,28 @@ new class extends Component
                                 </span>
                             </td>
                             <td data-label="Aksi" class="action-column">
-                                <div class="table-actions">
-                                    <a href="{{ route('members.edit', $member) }}" class="table-action table-action-secondary" wire:navigate>
-                                        Edit
-                                    </a>
-                                    <a href="{{ route('transactions.create', ['member' => $member->member_id]) }}" class="table-action table-action-primary" wire:navigate>
-                                        Transaksi
-                                    </a>
-                                    <a href="{{ $activeProgram ? route('member-programs.edit', $activeProgram) : route('member-programs.create', ['member' => $member->member_id]) }}" class="table-action table-action-secondary" wire:navigate>
-                                        {{ $activeProgram ? 'Edit Program' : 'Beri Program' }}
-                                    </a>
-                                </div>
+                                <flux:dropdown align="end">
+                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
+
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('members.edit', $member) }}" icon="pencil-square" wire:navigate>
+                                            Edit Member
+                                        </flux:menu.item>
+                                        <flux:menu.item href="{{ route('transactions.create', ['member' => $member->member_id]) }}" icon="credit-card" wire:navigate>
+                                            Transaksi Baru
+                                        </flux:menu.item>
+                                        <flux:menu.item href="{{ $activeProgram ? route('member-programs.edit', $activeProgram) : route('member-programs.create', ['member' => $member->member_id]) }}" icon="clipboard-document-list" wire:navigate>
+                                            {{ $activeProgram ? 'Edit Program' : 'Beri Program' }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            wire:click="confirmDelete({{ $member->member_id }})"
+                                            variant="danger"
+                                            icon="trash"
+                                        >
+                                            Hapus Member
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </td>
                         </tr>
                     @empty
@@ -180,5 +230,19 @@ new class extends Component
             <div class="data-pagination">{{ $members->links() }}</div>
         @endif
     </section>
+
+    <flux:modal name="delete-confirm" wire:model="showDeleteModal" class="max-w-md">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus Member?</flux:heading>
+                <flux:text>Apakah Anda yakin ingin menghapus member ini? Akun user terkait juga akan dihapus secara permanen.</flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="outline" wire:click="$set('showDeleteModal', false)">Batal</flux:button>
+                <flux:button variant="danger" wire:click="deleteMember">Hapus</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
 

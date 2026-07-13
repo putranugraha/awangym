@@ -14,6 +14,9 @@ new class extends Component
 
     public string $status = 'all';
 
+    public bool $showDeleteModal = false;
+    public ?int $deletingId = null;
+
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'status'], true)) {
@@ -39,6 +42,38 @@ new class extends Component
                 ? 'Trainer dan akun berhasil diaktifkan.'
                 : 'Trainer dan akun berhasil dinonaktifkan.'
         );
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->deletingId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteTrainer(): void
+    {
+        abort_unless(auth()->user()->can('manage trainers'), 403);
+        
+        $trainer = PersonalTrainer::findOrFail($this->deletingId);
+        $this->showDeleteModal = false;
+        
+        if ($trainer->memberPrograms()->exists()) {
+            session()->flash('error', 'Trainer tidak dapat dihapus karena ditugaskan pada program latihan member.');
+            return;
+        }
+
+        if (\App\Models\MemberExerciseCheck::where('validated_by', $trainer->trainer_id)->exists()) {
+            session()->flash('error', 'Trainer tidak dapat dihapus karena memiliki riwayat validasi gerakan member.');
+            return;
+        }
+
+        DB::transaction(function () use ($trainer) {
+            $user = $trainer->user;
+            $trainer->delete();
+            $user->delete();
+        });
+
+        session()->flash('success', 'Trainer berhasil dihapus.');
     }
 
     public function with(): array
@@ -92,7 +127,10 @@ new class extends Component
     </div>
 
     @if(session('success'))
-        <div class="notice">{{ session('success') }}</div>
+        <div x-data x-init="Flux.toast({ variant: 'success', text: '{{ session('success') }}' })"></div>
+    @endif
+    @if(session('error'))
+        <div x-data x-init="Flux.toast({ variant: 'danger', text: '{{ session('error') }}' })"></div>
     @endif
 
     <section class="data-panel">
@@ -170,19 +208,29 @@ new class extends Component
                                 </span>
                             </td>
                             <td data-label="Aksi" class="action-column">
-                                <div class="table-actions">
-                                    <a href="{{ route('personal-trainers.edit', $trainer) }}" class="table-action table-action-secondary" wire:navigate>
-                                        Edit
-                                    </a>
-                                    <button
-                                        type="button"
-                                        class="table-action {{ $trainer->employment_status === 'active' ? 'table-action-danger' : 'table-action-primary' }}"
-                                        wire:click="toggleStatus({{ $trainer->trainer_id }})"
-                                        wire:confirm="{{ $trainer->employment_status === 'active' ? 'Nonaktifkan trainer dan blokir akses login?' : 'Aktifkan kembali trainer dan akses login?' }}"
-                                    >
-                                        {{ $trainer->employment_status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}
-                                    </button>
-                                </div>
+                                <flux:dropdown align="end">
+                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('personal-trainers.edit', $trainer) }}" icon="pencil-square" wire:navigate>
+                                            Edit Trainer
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            wire:click="toggleStatus({{ $trainer->trainer_id }})"
+                                            wire:confirm="{{ $trainer->employment_status === 'active' ? 'Nonaktifkan trainer dan blokir akses login?' : 'Aktifkan kembali trainer dan akses login?' }}"
+                                            icon="{{ $trainer->employment_status === 'active' ? 'x-circle' : 'check-circle' }}"
+                                            variant="{{ $trainer->employment_status === 'active' ? 'danger' : 'primary' }}"
+                                        >
+                                            {{ $trainer->employment_status === 'active' ? 'Nonaktifkan' : 'Aktifkan' }}
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            wire:click="confirmDelete({{ $trainer->trainer_id }})"
+                                            variant="danger"
+                                            icon="trash"
+                                        >
+                                            Hapus Trainer
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </td>
                         </tr>
                     @empty
@@ -203,4 +251,18 @@ new class extends Component
             <div class="data-pagination">{{ $trainers->links() }}</div>
         @endif
     </section>
+
+    <flux:modal name="delete-confirm" wire:model="showDeleteModal" class="max-w-md">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus Trainer?</flux:heading>
+                <flux:text>Apakah Anda yakin ingin menghapus trainer ini? Akun user terkait juga akan dihapus secara permanen.</flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="outline" wire:click="$set('showDeleteModal', false)">Batal</flux:button>
+                <flux:button variant="danger" wire:click="deleteTrainer">Hapus</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

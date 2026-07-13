@@ -13,11 +13,36 @@ new class extends Component
 
     public string $status = 'all';
 
+    public bool $showDeleteModal = false;
+    public ?int $deletingId = null;
+
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'status'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->deletingId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deletePackage(): void
+    {
+        abort_unless(auth()->user()->can('manage packages'), 403);
+        
+        $package = MembershipPackage::findOrFail($this->deletingId);
+        $this->showDeleteModal = false;
+        
+        if ($package->subscriptions()->exists()) {
+            session()->flash('error', 'Paket tidak dapat dihapus karena sudah memiliki riwayat subscription oleh member.');
+            return;
+        }
+
+        $package->delete();
+        session()->flash('success', 'Paket berhasil dihapus.');
     }
 
     public function with(): array
@@ -86,7 +111,10 @@ new class extends Component
     </div>
 
     @if(session('success'))
-        <div class="notice">{{ session('success') }}</div>
+        <div x-data x-init="Flux.toast({ variant: 'success', text: '{{ session('success') }}' })"></div>
+    @endif
+    @if(session('error'))
+        <div x-data x-init="Flux.toast({ variant: 'danger', text: '{{ session('error') }}' })"></div>
     @endif
 
     <section class="data-panel">
@@ -113,6 +141,7 @@ new class extends Component
                         <th>Nama Paket</th>
                         <th>Durasi</th>
                         <th>Harga</th>
+                        <th>Layanan PT</th>
                         <th>Subscription Aktif</th>
                         <th>Total Digunakan</th>
                         <th>Status</th>
@@ -135,9 +164,16 @@ new class extends Component
                                 <span class="package-duration">{{ $package->duration_months }}</span>
                                 <small class="table-secondary">bulan</small>
                             </td>
-                            <td data-label="Harga">
+                             <td data-label="Harga">
                                 <strong class="package-price">Rp {{ number_format($package->price, 0, ',', '.') }}</strong>
-                            </td>
+                             </td>
+                             <td data-label="Layanan PT">
+                                @if($package->has_trainer)
+                                    <span class="package-status package-status-active"><i></i>Dengan PT</span>
+                                @else
+                                    <span class="package-status package-status-inactive" style="color: var(--color-slate-500); background-color: var(--color-slate-100);">Gym Mandiri</span>
+                                @endif
+                             </td>
                             <td data-label="Subscription Aktif">
                                 <span class="usage-count usage-count-active">{{ $package->active_subscriptions_count }}</span>
                             </td>
@@ -150,16 +186,26 @@ new class extends Component
                                 </span>
                             </td>
                             <td data-label="Aksi" class="action-column">
-                                <div class="table-actions">
-                                    <a href="{{ route('packages.edit', $package) }}" class="table-action table-action-secondary" wire:navigate>
-                                        Edit Paket
-                                    </a>
-                                </div>
+                                <flux:dropdown align="end">
+                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('packages.edit', $package) }}" icon="pencil-square" wire:navigate>
+                                            Edit Paket
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            wire:click="confirmDelete({{ $package->package_id }})"
+                                            variant="danger"
+                                            icon="trash"
+                                        >
+                                            Hapus Paket
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                             <td colspan="8">
                                 <div class="table-empty">
                                     <strong>Paket tidak ditemukan</strong>
                                     <p>Coba ubah pencarian atau filter status.</p>
@@ -175,4 +221,18 @@ new class extends Component
             <div class="data-pagination">{{ $packages->links() }}</div>
         @endif
     </section>
+
+    <flux:modal name="delete-confirm" wire:model="showDeleteModal" class="max-w-md">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus Paket?</flux:heading>
+                <flux:text>Apakah Anda yakin ingin menghapus paket ini? Tindakan ini tidak dapat dibatalkan.</flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="outline" wire:click="$set('showDeleteModal', false)">Batal</flux:button>
+                <flux:button variant="danger" wire:click="deletePackage">Hapus</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>

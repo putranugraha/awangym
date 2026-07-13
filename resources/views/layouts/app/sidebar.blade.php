@@ -4,17 +4,31 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
+        @php
+            $logoUrl = route('dashboard');
+            if (auth()->check()) {
+                if (!auth()->user()->can('view dashboard')) {
+                    if (auth()->user()->can('view assigned members')) {
+                        $logoUrl = route('trainer-members.index');
+                    } elseif (auth()->user()->can('view own membership')) {
+                        $logoUrl = route('membership.show');
+                    }
+                }
+            }
+        @endphp
         <flux:sidebar sticky collapsible="mobile" class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
             <flux:sidebar.header>
-                <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
+                <x-app-logo :sidebar="true" href="{{ $logoUrl }}" wire:navigate />
                 <flux:sidebar.collapse class="lg:hidden" />
             </flux:sidebar.header>
 
             <flux:sidebar.nav>
                 <flux:sidebar.group heading="Menu" class="grid">
+                    @can('view dashboard')
                     <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </flux:sidebar.item>
+                    @endcan
                     @can('manage users')
                     <flux:sidebar.item icon="user-circle" :href="route('users.index')" :current="request()->routeIs('users.*')">User</flux:sidebar.item>
                     @endcan

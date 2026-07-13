@@ -10,7 +10,7 @@
                 <div class="auth-orb auth-orb-two"></div>
 
                 <a href="{{ route('home') }}" class="auth-brand" wire:navigate>
-                    <span class="auth-brand-mark"><x-app-logo-icon /></span>
+                    <span class="auth-brand-mark" style="background: transparent; box-shadow: none; overflow: hidden; width: 72px; height: 72px; border-radius: 9999px;"><x-app-logo-icon style="width: 100%; height: 100%; object-fit: cover;" /></span>
                     <span><strong>AWAN</strong> GYM</span>
                 </a>
 
@@ -30,7 +30,7 @@
 
             <section class="auth-form-side">
                 <div class="auth-mobile-brand">
-                    <span class="auth-brand-mark"><x-app-logo-icon /></span>
+                    <span class="auth-brand-mark" style="background: transparent; box-shadow: none; overflow: hidden; width: 72px; height: 72px; border-radius: 9999px;"><x-app-logo-icon style="width: 100%; height: 100%; object-fit: cover;" /></span>
                     <span><strong>AWAN</strong> GYM</span>
                 </div>
 

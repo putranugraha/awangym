@@ -2,6 +2,7 @@
 
 use App\Models\PaymentTransaction;
 use App\Services\MembershipPaymentService;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -16,14 +17,44 @@ new class extends Component
     public string $method = 'all';
 
     public bool $showVerificationModal = false;
+    public bool $showDeleteModal = false;
 
     public ?int $verifyingTransactionId = null;
+    public ?int $deletingId = null;
 
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'status', 'method'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->deletingId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteTransaction(): void
+    {
+        abort_unless(auth()->user()->can('manage payments'), 403);
+        
+        $transaction = PaymentTransaction::findOrFail($this->deletingId);
+        $this->showDeleteModal = false;
+        
+        if (in_array($transaction->payment_status, ['paid', 'refunded'], true)) {
+            session()->flash('error', 'Transaksi yang sudah lunas (Paid) atau dikembalikan (Refunded) tidak dapat dihapus demi audit keuangan.');
+            return;
+        }
+
+        DB::transaction(function () use ($transaction) {
+            if ($transaction->subscription) {
+                $transaction->subscription->delete();
+            }
+            $transaction->delete();
+        });
+
+        session()->flash('success', 'Transaksi berhasil dihapus.');
     }
 
     public function openVerificationModal(int $id): void
@@ -118,7 +149,10 @@ new class extends Component
     </div>
 
     @if(session('success'))
-        <div class="notice">{{ session('success') }}</div>
+        <div x-data x-init="Flux.toast({ variant: 'success', text: '{{ session('success') }}' })"></div>
+    @endif
+    @if(session('error'))
+        <div x-data x-init="Flux.toast({ variant: 'danger', text: '{{ session('error') }}' })"></div>
     @endif
 
     <section class="data-panel">
@@ -183,6 +217,9 @@ new class extends Component
                             <td data-label="Paket">
                                 <span class="table-primary">{{ $transaction->subscription->package->package_name }}</span>
                                 <small class="table-secondary">{{ $transaction->subscription->start_date->format('d M') }} – {{ $transaction->subscription->end_date->format('d M Y') }}</small>
+                                @if($transaction->subscription->trainer)
+                                    <small class="table-secondary" style="display: block; font-weight: 500; color: var(--color-primary);">PT: {{ $transaction->subscription->trainer->user->full_name }}</small>
+                                @endif
                             </td>
                             <td data-label="Metode">
                                 <span class="payment-method payment-method-{{ $transaction->payment_method }}">
@@ -202,21 +239,32 @@ new class extends Component
                                 </span>
                             </td>
                             <td data-label="Aksi" class="action-column">
-                                <div class="table-actions">
-                                    <a href="{{ route('transactions.edit', $transaction) }}" class="table-action table-action-secondary" wire:navigate>
-                                        Edit
-                                    </a>
-                                    @if($transaction->payment_status === 'pending')
-                                        <button
-                                            type="button"
-                                            class="table-action table-action-primary"
-                                            wire:click="openVerificationModal({{ $transaction->transaction_id }})"
-                                            wire:loading.attr="disabled"
-                                        >
-                                            Verifikasi
-                                        </button>
-                                    @endif
-                                </div>
+                                <flux:dropdown align="end">
+                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('transactions.edit', $transaction) }}" icon="pencil-square" wire:navigate>
+                                            Edit Transaksi
+                                        </flux:menu.item>
+                                        @if($transaction->payment_status === 'pending')
+                                            <flux:menu.item
+                                                wire:click="openVerificationModal({{ $transaction->transaction_id }})"
+                                                wire:loading.attr="disabled"
+                                                icon="check-circle"
+                                            >
+                                                Verifikasi Pembayaran
+                                            </flux:menu.item>
+                                        @endif
+                                        @if(!in_array($transaction->payment_status, ['paid', 'refunded'], true))
+                                            <flux:menu.item
+                                                wire:click="confirmDelete({{ $transaction->transaction_id }})"
+                                                variant="danger"
+                                                icon="trash"
+                                            >
+                                                Hapus Transaksi
+                                            </flux:menu.item>
+                                        @endif
+                                    </flux:menu>
+                                </flux:dropdown>
                             </td>
                         </tr>
                     @empty
@@ -259,6 +307,9 @@ new class extends Component
                 <dl class="verification-details">
                     <div><dt>Invoice</dt><dd>{{ $selectedTransaction->invoice_number }}</dd></div>
                     <div><dt>Paket membership</dt><dd>{{ $selectedTransaction->subscription->package->package_name }}</dd></div>
+                    @if($selectedTransaction->subscription->trainer)
+                        <div><dt>Trainer</dt><dd>{{ $selectedTransaction->subscription->trainer->user->full_name }}</dd></div>
+                    @endif
                     <div><dt>Metode</dt><dd>{{ match($selectedTransaction->payment_method) {'cash' => 'Tunai', 'e_wallet' => 'E-wallet', default => 'Transfer'} }}</dd></div>
                     <div class="verification-total"><dt>Nominal diterima</dt><dd>Rp {{ number_format($selectedTransaction->amount, 0, ',', '.') }}</dd></div>
                 </dl>
@@ -272,6 +323,20 @@ new class extends Component
                 </div>
             </div>
         @endif
+    </flux:modal>
+
+    <flux:modal name="delete-confirm" wire:model="showDeleteModal" class="max-w-md">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus Transaksi?</flux:heading>
+                <flux:text>Apakah Anda yakin ingin menghapus transaksi ini? Data pendaftaran/perpanjangan paket terkait juga akan terhapus secara permanen.</flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="outline" wire:click="$set('showDeleteModal', false)">Batal</flux:button>
+                <flux:button variant="danger" wire:click="deleteTransaction">Hapus</flux:button>
+            </div>
+        </div>
     </flux:modal>
 </div>
 
