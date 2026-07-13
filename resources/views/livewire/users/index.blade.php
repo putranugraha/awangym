@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,11 +13,57 @@ new class extends Component
     public string $role = 'all';
     public string $status = 'all';
 
+    public bool $showDeleteModal = false;
+    public ?int $deletingId = null;
+
     public function updated(string $property): void
     {
         if (in_array($property, ['search', 'role', 'status'], true)) {
             $this->resetPage();
         }
+    }
+
+    public function confirmDelete(int $id): void
+    {
+        $this->deletingId = $id;
+        $this->showDeleteModal = true;
+    }
+
+    public function deleteUser(): void
+    {
+        abort_unless(auth()->user()->can('manage users'), 403);
+        
+        $user = User::findOrFail($this->deletingId);
+        $this->showDeleteModal = false;
+        
+        if ($user->user_id === auth()->id()) {
+            session()->flash('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+            return;
+        }
+
+        if (\App\Models\MembershipSubscription::where('created_by', $user->user_id)->exists()) {
+            session()->flash('error', 'User tidak dapat dihapus karena telah mencatat transaksi subscription.');
+            return;
+        }
+
+        if ($user->member && $user->member->subscriptions()->exists()) {
+            session()->flash('error', 'User tidak dapat dihapus karena member terkait memiliki riwayat subscription.');
+            return;
+        }
+
+        if ($user->personalTrainer) {
+            $trainer = $user->personalTrainer;
+            if (\App\Models\MemberExerciseCheck::where('validated_by', $trainer->trainer_id)->exists()) {
+                session()->flash('error', 'User tidak dapat dihapus karena trainer terkait memiliki riwayat validasi gerakan member.');
+                return;
+            }
+        }
+
+        DB::transaction(function () use ($user) {
+            $user->delete();
+        });
+
+        session()->flash('success', 'User berhasil dihapus.');
     }
 
     public function with(): array
@@ -56,7 +103,12 @@ new class extends Component
         <article><span>Administrator</span><strong>{{ $adminUsers }}</strong><small>Akun operasional</small></article>
     </div>
 
-    @if(session('success'))<div class="notice">{{ session('success') }}</div>@endif
+    @if(session('success'))
+        <div x-data x-init="Flux.toast({ variant: 'success', text: '{{ session('success') }}' })"></div>
+    @endif
+    @if(session('error'))
+        <div x-data x-init="Flux.toast({ variant: 'danger', text: '{{ session('error') }}' })"></div>
+    @endif
 
     <section class="data-panel">
         <div class="data-toolbar user-toolbar">
@@ -86,7 +138,23 @@ new class extends Component
                             <td data-label="Role"><span class="user-role user-role-{{ $roleName }}">{{ $roleLabel }}</span></td>
                             <td data-label="Profil"><span class="table-primary">{{ $profileCode ?? 'Akun operasional' }}</span></td>
                             <td data-label="Status"><span class="account-status account-status-{{ $user->account_status }}">{{ $user->account_status === 'active' ? 'Dapat login' : 'Diblokir' }}</span></td>
-                            <td data-label="Aksi" class="action-column"><a class="table-action table-action-secondary" href="{{ route('users.edit', $user) }}" wire:navigate>Edit</a></td>
+                            <td data-label="Aksi" class="action-column">
+                                <flux:dropdown align="end">
+                                    <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
+                                    <flux:menu>
+                                        <flux:menu.item href="{{ route('users.edit', $user) }}" icon="pencil-square" wire:navigate>
+                                            Edit User
+                                        </flux:menu.item>
+                                        <flux:menu.item
+                                            wire:click="confirmDelete({{ $user->user_id }})"
+                                            variant="danger"
+                                            icon="trash"
+                                        >
+                                            Hapus User
+                                        </flux:menu.item>
+                                    </flux:menu>
+                                </flux:dropdown>
+                            </td>
                         </tr>
                     @empty
                         <tr><td colspan="6"><div class="table-empty"><strong>User tidak ditemukan</strong><p>Coba ubah pencarian atau filter.</p></div></td></tr>
@@ -96,4 +164,18 @@ new class extends Component
         </div>
         @if($users->hasPages())<div class="data-pagination">{{ $users->links() }}</div>@endif
     </section>
+
+    <flux:modal name="delete-confirm" wire:model="showDeleteModal" class="max-w-md">
+        <div class="space-y-6">
+            <div>
+                <flux:heading size="lg">Hapus User?</flux:heading>
+                <flux:text>Apakah Anda yakin ingin menghapus user ini? Akun dan profil terkait akan dihapus secara permanen.</flux:text>
+            </div>
+            <div class="flex gap-2">
+                <flux:spacer />
+                <flux:button variant="outline" wire:click="$set('showDeleteModal', false)">Batal</flux:button>
+                <flux:button variant="danger" wire:click="deleteUser">Hapus</flux:button>
+            </div>
+        </div>
+    </flux:modal>
 </div>
