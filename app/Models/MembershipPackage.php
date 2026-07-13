@@ -8,13 +8,14 @@ class MembershipPackage extends Model
 {
     protected $primaryKey = 'package_id';
 
-    protected $fillable = ['package_name', 'duration_months', 'price', 'has_trainer', 'description', 'package_status'];
+    protected $fillable = ['package_name', 'duration_months', 'price', 'has_trainer', 'trainer_session_limit', 'description', 'package_status'];
 
     protected function casts(): array
     {
         return [
             'price' => 'decimal:2',
             'has_trainer' => 'boolean',
+            'trainer_session_limit' => 'integer',
         ];
     }
 

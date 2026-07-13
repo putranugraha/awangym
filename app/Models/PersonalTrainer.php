@@ -19,4 +19,14 @@ class PersonalTrainer extends Model
     {
         return $this->hasMany(MemberProgram::class, 'trainer_id');
     }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(MembershipSubscription::class, 'trainer_id');
+    }
+
+    public function sessions()
+    {
+        return $this->hasMany(TrainerSession::class, 'trainer_id');
+    }
 }

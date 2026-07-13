@@ -74,12 +74,20 @@ Informasi minimum yang wajib terlihat jelas di kartu:
 
 1. Sistem menyediakan katalog exercise dan program Gym Beginner serta Gym Strength melalui seeder.
 2. Admin menetapkan satu program aktif kepada member dan dapat memilih personal trainer secara opsional.
-3. Member tanpa personal trainer tetap dapat menjalankan dan melihat program secara mandiri.
-4. Personal trainer hanya melihat member yang ditugaskan kepadanya dan memvalidasi gerakan yang dilakukan bersama.
-5. Sistem tidak mencatat beban atau repetisi aktual; validasi PT hanya berupa checklist selesai.
+3. Program latihan pada portal member berfungsi sebagai contoh atau referensi untuk membantu member pemula, bukan sebagai pencatatan progres.
+4. Member tanpa personal trainer tetap dapat melihat referensi program secara mandiri.
+5. Halaman member tidak menampilkan persentase progres, status selesai, atau checklist validasi exercise.
 6. Member melihat program dengan format ramah ponsel: per minggu/hari, card atau accordion, bukan tabel lebar.
 
-### 3.5 Keuangan
+### 3.5 Pendampingan personal trainer
+
+1. Paket yang menyertakan personal trainer wajib memiliki kuota pertemuan, misalnya 12 sesi untuk paket satu bulan.
+2. Saat paket dibeli, trainer dan kuota disalin ke subscription agar perubahan paket berikutnya tidak mengubah hak member yang sudah berjalan.
+3. Trainer hanya melihat member binaan dari subscription berbayar yang ditugaskan kepadanya.
+4. Setiap pertemuan menyimpan tanggal dan catatan kegiatan. Nomor pertemuan dihitung otomatis dan hasil input trainer dapat dilihat oleh member terkait.
+5. Tanggal pertemuan wajib berada dalam periode subscription, tidak boleh di masa depan, dan jumlah catatan tidak boleh melebihi kuota paket.
+
+### 3.6 Keuangan
 
 - Sumber laporan keuangan adalah `payment_transactions`.
 - Pemasukan hanya dihitung dari transaksi dengan `payment_status = paid`.

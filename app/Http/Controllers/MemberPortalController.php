@@ -9,9 +9,9 @@ class MemberPortalController extends Controller
     public function membership(MembershipStatusService $service)
     {
         $member = auth()->user()->member;
-        $subscriptions = $member->subscriptions()->with(['package', 'payment'])->latest('end_date')->get();
+        $subscriptions = $member->subscriptions()->with(['package', 'payment', 'trainer.user', 'trainerSessions'])->latest('end_date')->get();
         $currentSubscription = $member->subscriptions()
-            ->with(['package', 'payment'])
+            ->with(['package', 'payment', 'trainer.user', 'trainerSessions'])
             ->current()
             ->latest('end_date')
             ->first();

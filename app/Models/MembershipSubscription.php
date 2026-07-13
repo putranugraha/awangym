@@ -9,7 +9,7 @@ class MembershipSubscription extends Model
 {
     protected $primaryKey = 'subscription_id';
 
-    protected $fillable = ['member_id', 'package_id', 'trainer_id', 'created_by', 'subscription_type', 'start_date', 'end_date', 'subscription_status', 'notes'];
+    protected $fillable = ['member_id', 'package_id', 'trainer_id', 'trainer_session_limit', 'created_by', 'subscription_type', 'start_date', 'end_date', 'subscription_status', 'notes'];
 
     protected function casts(): array
     {
@@ -56,5 +56,10 @@ class MembershipSubscription extends Model
     public function payment()
     {
         return $this->hasOne(PaymentTransaction::class, 'subscription_id');
+    }
+
+    public function trainerSessions()
+    {
+        return $this->hasMany(TrainerSession::class, 'subscription_id');
     }
 }

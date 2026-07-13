@@ -30,23 +30,39 @@
                 <p>Status dihitung langsung dari periode aktif dan pembayaran terverifikasi.</p>
             </section>
 
+            @if($subscription?->trainer)
+                <section class="member-trainer-card">
+                    <div class="member-trainer-card-head">
+                        <div><span class="eyebrow">PERSONAL TRAINER</span><h2>{{ $subscription->trainer->user->full_name }}</h2><p>{{ $subscription->trainer->trainer_code }} · Pendamping paket aktif</p></div>
+                        <span class="usage-count usage-count-active">{{ $subscription->trainerSessions->count() }}/{{ $subscription->trainer_session_limit }} sesi</span>
+                    </div>
+                    @if($subscription->trainerSessions->isNotEmpty())
+                        @php($latestSession = $subscription->trainerSessions->sortByDesc('session_date')->first())
+                        <div class="member-latest-note"><strong>Pertemuan terbaru · {{ $latestSession->session_date->translatedFormat('d F Y') }}</strong><p>{{ $latestSession->notes }}</p></div>
+                    @else
+                        <p class="member-trainer-empty">Belum ada catatan pertemuan dari personal trainer.</p>
+                    @endif
+                    <a class="table-action table-action-primary" href="{{ route('my-program.index') }}" wire:navigate>Lihat semua catatan</a>
+                </section>
+            @endif
+
             <section>
-                <div class="section-title"><h2>Program latihan aktif</h2></div>
-                @forelse($member->programs as $assignment)
+                <div class="section-title"><h2>Referensi program latihan</h2></div>
+                @forelse($member->programs->unique('program_id') as $assignment)
                     <article class="list-card">
                         <div><span class="chip">{{ ucfirst($assignment->program->difficulty_level) }}</span><h3>{{ $assignment->program->program_name }}</h3><p>{{ $assignment->trainer ? 'Trainer '.$assignment->trainer->user->full_name : 'Latihan mandiri' }}</p></div>
-                        <strong>{{ number_format($assignment->progress_percentage) }}%</strong>
+                        <a class="table-action table-action-primary" href="{{ route('my-program.index') }}" wire:navigate>Lihat contoh</a>
                     </article>
                 @empty
-                    <div class="empty-card"><strong>Belum ada program aktif</strong><p>Program dari personal trainer akan muncul di sini.</p></div>
+                    <div class="empty-card"><strong>Belum ada referensi program</strong><p>Contoh program latihan akan muncul di sini.</p></div>
                 @endforelse
             </section>
         @elseif(auth()->user()->hasRole('personal_trainer'))
             <div class="metric-grid">
                 <article class="metric-card"><span>Member binaan</span><strong>{{ $memberCount }}</strong></article>
-                <article class="metric-card accent"><span>Program aktif</span><strong>{{ $activePrograms }}</strong></article>
+                <article class="metric-card accent"><span>Sisa pertemuan</span><strong>{{ $remainingSessions }}</strong></article>
             </div>
-            <section class="empty-card"><h2>Pendampingan member</h2><p>Lihat member binaan dan validasi gerakan yang dilakukan bersama di gym.</p><a class="primary-btn" href="{{ route('trainer-members.index') }}">Buka Member Binaan</a></section>
+            <section class="empty-card"><h2>Pendampingan member</h2><p>Lihat member binaan dan catat tanggal serta hasil setiap pertemuan.</p><a class="primary-btn" href="{{ route('trainer-members.index') }}">Buka Member Binaan</a></section>
         @else
             <section class="dashboard-welcome">
                 <div>

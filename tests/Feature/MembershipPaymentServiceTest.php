@@ -85,7 +85,9 @@ test('verifying payment places its period after the latest paid subscription', f
         ->payment_status->toBe('paid')
         ->payment_date->not->toBeNull()
         ->and($nextSubscription->fresh()->start_date->toDateString())
-        ->toBe($current['subscription']->end_date->copy()->addDay()->toDateString());
+        ->toBe($current['subscription']->end_date->copy()->addDay()->toDateString())
+        ->and($nextSubscription->fresh()->end_date->toDateString())
+        ->toBe($current['subscription']->end_date->copy()->addDay()->addMonthNoOverflow()->toDateString());
 });
 
 test('changing a paid transaction to unpaid clears verification metadata', function () {

@@ -17,19 +17,40 @@ new class extends Component
 
     public bool $has_trainer = false;
 
+    public int|string $trainer_session_limit = '';
+
+    public function updatedHasTrainer(bool $value): void
+    {
+        if ($value && $this->trainer_session_limit === '') {
+            $this->trainer_session_limit = max((int) $this->duration_months * 12, 12);
+        }
+    }
+
+    public function updatedDurationMonths(): void
+    {
+        $maximum = max((int) $this->duration_months * 12, 1);
+        if ($this->has_trainer && ($this->trainer_session_limit === '' || (int) $this->trainer_session_limit > $maximum)) {
+            $this->trainer_session_limit = $maximum;
+        }
+    }
+
     public function save(): void
     {
+        $maxTrainerSessions = max((int) $this->duration_months * 12, 1);
         $data = $this->validate([
             'package_name' => ['required', 'max:100'],
             'duration_months' => ['required', 'integer', 'min:1', 'max:60'],
             'price' => ['required', 'numeric', 'min:0'],
             'has_trainer' => ['boolean'],
+            'trainer_session_limit' => ['nullable', 'integer', 'min:1', 'max:'.$maxTrainerSessions, 'required_if:has_trainer,true'],
             'description' => ['nullable'],
             'package_status' => ['required', 'in:active,inactive']
         ]);
 
         if ($data['has_trainer']) {
             $data['price'] = (float)$data['price'] + ((int)$data['duration_months'] * 1800000);
+        } else {
+            $data['trainer_session_limit'] = null;
         }
 
         MembershipPackage::create($data);
@@ -73,11 +94,12 @@ new class extends Component
                 </label>
             </div>
             @if($has_trainer)
+                <label class="mt-3"><span>Jumlah pertemuan PT <em>*</em></span><input class="form-input" type="number" min="1" max="{{ max((int) $duration_months * 12, 1) }}" wire:model.live="trainer_session_limit" placeholder="Contoh: 12"><small class="trainer-session-help">Maksimal 12 pertemuan per bulan ({{ max((int) $duration_months * 12, 0) }} sesi untuk durasi ini).</small></label>
                 <div class="mt-3 p-3 bg-zinc-50 border border-zinc-200 rounded-lg dark:bg-zinc-800/50 dark:border-zinc-700">
                     <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Estimasi Sesi & Biaya Tambahan Trainer:</p>
                     @if(filled($duration_months) && (int)$duration_months > 0)
                         <ul class="mt-1 list-disc list-inside text-sm text-zinc-600 dark:text-zinc-400">
-                            <li>Total Pertemuan: <strong>{{ (int) $duration_months * 12 }}x pertemuan</strong> (12x sesi/bulan)</li>
+                            <li>Total Pertemuan: <strong>{{ (int) ($trainer_session_limit ?: 0) }}x pertemuan</strong></li>
                             <li>Total Biaya Trainer: <strong>Rp {{ number_format((int) $duration_months * 1800000, 0, ',', '.') }}</strong> (Rp 1.800.000/bulan)</li>
                             <li style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--color-slate-200); list-style: none; color: var(--color-primary); font-weight: 600;">
                                 Total Harga Paket: Rp {{ number_format((float)($price ?: 0) + ((int)$duration_months * 1800000), 0, ',', '.') }}
@@ -108,4 +130,3 @@ new class extends Component
         </aside>
     </form>
 </div>
-

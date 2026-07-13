@@ -20,7 +20,7 @@ class DashboardController extends Controller
                 'programs' => fn ($q) => $q->with(['program', 'trainer.user'])->where('program_status', 'active'),
             ])->firstOrFail();
             $subscription = $member->subscriptions()
-                ->with(['package', 'payment'])
+                ->with(['package', 'payment', 'trainer.user', 'trainerSessions'])
                 ->current()
                 ->latest('end_date')
                 ->first();
@@ -30,11 +30,18 @@ class DashboardController extends Controller
 
         if ($user->hasRole('personal_trainer')) {
             $trainer = $user->personalTrainer;
+            $subscriptions = $trainer->subscriptions()
+                ->withCount('trainerSessions')
+                ->where('subscription_status', 'active')
+                ->whereDate('start_date', '<=', today())
+                ->whereDate('end_date', '>=', today())
+                ->whereHas('payment', fn ($payment) => $payment->where('payment_status', 'paid'))
+                ->get();
 
             return view('dashboard', [
                 'trainer' => $trainer,
-                'activePrograms' => $trainer->memberPrograms()->where('program_status', 'active')->count(),
-                'memberCount' => $trainer->memberPrograms()->where('program_status', 'active')->distinct('member_id')->count('member_id'),
+                'remainingSessions' => $subscriptions->sum(fn ($subscription) => max(($subscription->trainer_session_limit ?? 0) - $subscription->trainer_sessions_count, 0)),
+                'memberCount' => $subscriptions->pluck('member_id')->unique()->count(),
             ]);
         }
 

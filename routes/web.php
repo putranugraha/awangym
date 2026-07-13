@@ -67,7 +67,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::middleware('permission:view assigned members')->group(function () {
         Route::livewire('trainer-members', 'app::trainer-members.index')->name('trainer-members.index');
-        Route::livewire('trainer-members/{memberProgram}', 'app::trainer-members.show')->name('trainer-members.show');
+        Route::livewire('trainer-members/{subscription}', 'app::trainer-members.show')->name('trainer-members.show');
     });
 
     Route::get('membership', [MemberPortalController::class, 'membership'])

@@ -33,7 +33,7 @@ class MembershipPaymentService
             $subscription->update([
                 'subscription_type' => $lastPaid ? 'renewal' : 'new_registration',
                 'start_date' => $start,
-                'end_date' => $start->copy()->addMonthsNoOverflow($subscription->package->duration_months)->subDay(),
+                'end_date' => $start->copy()->addMonthsNoOverflow($subscription->package->duration_months),
                 'subscription_status' => 'active',
             ]);
 

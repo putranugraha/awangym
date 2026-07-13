@@ -76,9 +76,10 @@ new class extends Component
                 'created_by' => auth()->id(),
                 'subscription_type' => $lastPaid ? 'renewal' : 'new_registration',
                 'start_date' => $start,
-                'end_date' => $start->copy()->addMonthsNoOverflow($package->duration_months)->subDay(),
+                'end_date' => $start->copy()->addMonthsNoOverflow($package->duration_months),
                 'subscription_status' => 'active',
-                'trainer_id' => $package->has_trainer ? $d['trainer_id'] : null
+                'trainer_id' => $package->has_trainer ? $d['trainer_id'] : null,
+                'trainer_session_limit' => $package->has_trainer ? $package->trainer_session_limit : null,
             ]);
 
             // Auto-assign both workout programs to the member
@@ -145,7 +146,7 @@ new class extends Component
         <section class="form-card transaction-form-main">
             <div class="form-section-title"><span>01</span><div><h2>Member dan Paket</h2><p>Tentukan penerima dan paket membership.</p></div></div>
             <label><span>Member <em>*</em></span><select class="form-input" wire:model.live="member_id"><option value="">Pilih member</option>@foreach($members as $m)<option value="{{ $m->member_id }}">{{ $m->member_code }} — {{ $m->user->full_name }}</option>@endforeach</select></label>
-            <label><span>Paket membership <em>*</em></span><select class="form-input" wire:model.live="package_id"><option value="">Pilih paket</option>@foreach($packages as $p)<option value="{{ $p->package_id }}">{{ $p->package_name }} — Rp {{ number_format($p->price, 0, ',', '.') }}{{ $p->has_trainer ? ' (Dengan PT)' : ' (Gym Mandiri)' }}</option>@endforeach</select></label>
+            <label><span>Paket membership <em>*</em></span><select class="form-input" wire:model.live="package_id"><option value="">Pilih paket</option>@foreach($packages as $p)<option value="{{ $p->package_id }}">{{ $p->package_name }} — Rp {{ number_format($p->price, 0, ',', '.') }}{{ $p->has_trainer ? ' (PT '.$p->trainer_session_limit.'x)' : ' (Gym Mandiri)' }}</option>@endforeach</select></label>
             
             @if($requiresTrainer)
                 <label><span>Personal Trainer Pendamping <em>*</em></span><select class="form-input" wire:model.live="trainer_id"><option value="">Pilih trainer</option>@foreach($trainers as $t)<option value="{{ $t->trainer_id }}">{{ $t->trainer_code }} — {{ $t->user->full_name }}</option>@endforeach</select></label>
@@ -179,7 +180,7 @@ new class extends Component
                         </div>
                         @if($package->has_trainer)
                             <div style="display: flex; justify-content: space-between;">
-                                <span class="text-zinc-500">Biaya Trainer (12x/bln):</span>
+                                <span class="text-zinc-500">Biaya Trainer ({{ $package->trainer_session_limit }}x sesi):</span>
                                 <span style="font-weight: 500;">Rp {{ number_format($package->duration_months * 1800000, 0, ',', '.') }}</span>
                             </div>
                         @endif
@@ -197,4 +198,3 @@ new class extends Component
         </aside>
     </form>
 </div>
-

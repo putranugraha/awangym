@@ -170,6 +170,7 @@ new class extends Component
                              <td data-label="Layanan PT">
                                 @if($package->has_trainer)
                                     <span class="package-status package-status-active"><i></i>Dengan PT</span>
+                                    <small class="table-secondary">{{ $package->trainer_session_limit }}x pertemuan</small>
                                 @else
                                     <span class="package-status package-status-inactive" style="color: var(--color-slate-500); background-color: var(--color-slate-100);">Gym Mandiri</span>
                                 @endif
