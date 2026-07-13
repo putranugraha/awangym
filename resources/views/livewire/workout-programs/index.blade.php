@@ -37,9 +37,6 @@ new class extends Component
 <div class="awan-page">
     <header class="resource-header">
         <div><span class="eyebrow">KATALOG GYM</span><h1>Program Latihan</h1><p>Program bawaan Awan Gym yang dapat diberikan kepada member.</p></div>
-        @can('assign workout programs')
-            <a class="primary-btn" href="{{ route('member-programs.create') }}" wire:navigate>+ Berikan Program</a>
-        @endcan
     </header>
 
     <div class="transaction-stats">
