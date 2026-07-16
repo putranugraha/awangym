@@ -96,8 +96,8 @@ new class extends Component
 
             <div class="form-section-title member-section-gap"><span>02</span><div><h2>Durasi dan Harga</h2><p>Perbarui masa berlaku dan harga paket.</p></div></div>
             <div class="form-grid">
-                <label><span>Durasi (bulan) <em>*</em></span><input class="form-input" type="number" min="1" max="60" wire:model.live.debounce.300ms="duration_months" placeholder="Contoh: 1"></label>
-                <label><span>Harga Base Membership <em>*</em></span><input class="form-input" type="number" min="0" wire:model.live.debounce.300ms="price" placeholder="Contoh: 150000"></label>
+                <label><span>Durasi (bulan) <em>*</em></span><input wire:key="package-duration-input" class="form-input" type="number" min="1" max="60" step="1" inputmode="numeric" wire:model="duration_months" placeholder="Contoh: 1"></label>
+                <label><span>Harga Base Membership <em>*</em></span><input wire:key="package-base-price-input" class="form-input" type="number" min="0" step="1" inputmode="numeric" wire:model="price" placeholder="Contoh: 150000" autocomplete="off"></label>
             </div>
 
             <div class="form-section-title member-section-gap"><span>03</span><div><h2>Personal Trainer</h2><p>Tentukan apakah paket ini termasuk layanan pendampingan trainer.</p></div></div>

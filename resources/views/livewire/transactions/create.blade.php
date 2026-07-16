@@ -31,6 +31,11 @@ new class extends Component
 
     public string $notes = '';
 
+    public function mount(): void
+    {
+        $this->start_date = today()->toDateString();
+    }
+
     public function updatedPackageId(string $value): void
     {
         $package = MembershipPackage::find($value);
@@ -158,7 +163,23 @@ new class extends Component
                 <label><span>Status <em>*</em></span><select class="form-input" wire:model.live="payment_status"><option value="">Pilih status</option><option value="pending">Pending</option><option value="paid">Paid</option></select></label>
             </div>
             <div class="form-section-title member-section-gap"><span>03</span><div><h2>Periode dan Catatan</h2><p>Tentukan tanggal mulai membership.</p></div></div>
-            <label><span>Tanggal mulai <em>*</em></span><input class="form-input" type="date" wire:model.live="start_date"></label>
+            <label>
+                <span>Tanggal mulai <em>*</em></span>
+                <div class="date-picker-field" x-data>
+                    <input
+                        x-ref="startDate"
+                        class="form-input"
+                        type="date"
+                        value="{{ $start_date }}"
+                        min="{{ today()->toDateString() }}"
+                        wire:model="start_date"
+                    >
+                    <button type="button" aria-label="Pilih tanggal mulai" title="Pilih tanggal" @click="$refs.startDate.showPicker ? $refs.startDate.showPicker() : $refs.startDate.focus()">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14H4V6a1 1 0 0 1 1-1Z"/></svg>
+                    </button>
+                </div>
+                <small class="form-field-help">Otomatis diisi tanggal hari ini. Klik ikon kalender untuk mengganti.</small>
+            </label>
             <label><span>Catatan</span><textarea class="form-input" wire:model="notes" rows="3" placeholder="Catatan transaksi (opsional)"></textarea></label>
         </section>
         <aside class="form-side-stack">

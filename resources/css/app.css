@@ -178,6 +178,7 @@
     .transaction-edit-summary dl div { @apply grid gap-1; }
     .transaction-edit-summary dt { @apply text-xs font-medium text-gray-500; }
     .transaction-edit-summary dd { @apply text-sm font-semibold text-gray-900; }
+    .date-picker-field { @apply relative; }.date-picker-field .form-input { @apply pr-12; }.date-picker-field button { @apply absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-lg text-gray-500 transition hover:bg-red-50 hover:text-red-700; }.date-picker-field button svg { @apply size-5 fill-none stroke-current;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }.date-picker-field input::-webkit-calendar-picker-indicator { opacity:0;position:absolute;inset:0;width:100%;height:100%;cursor:pointer; }.form-field-help { @apply mt-1 block text-xs font-normal text-gray-500; }
     .package-preview-card { @apply flex grid-cols-none items-center gap-3; }
     .package-preview-card>div { @apply grid min-w-0 grow; }
     .package-preview-card>div strong { @apply truncate text-sm; }
