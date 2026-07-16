@@ -37,7 +37,9 @@
                         <span class="usage-count usage-count-active">{{ $subscription->trainerSessions->count() }}/{{ $subscription->trainer_session_limit }} sesi</span>
                     </div>
                     @if($subscription->trainerSessions->isNotEmpty())
-                        @php($latestSession = $subscription->trainerSessions->sortByDesc('session_date')->first())
+                        @php
+                            $latestSession = $subscription->trainerSessions->sortByDesc('session_date')->first();
+                        @endphp
                         <div class="member-latest-note"><strong>Pertemuan terbaru · {{ $latestSession->session_date->translatedFormat('d F Y') }}</strong><p>{{ $latestSession->notes }}</p></div>
                     @else
                         <p class="member-trainer-empty">Belum ada catatan pertemuan dari personal trainer.</p>

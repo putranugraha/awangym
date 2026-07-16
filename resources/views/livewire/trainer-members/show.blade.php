@@ -87,8 +87,10 @@ new class extends Component
 };
 ?>
 
-@php($latestSessionDate = today()->lt($subscription->end_date) ? today() : $subscription->end_date)
-@php($periodHasStarted = today()->gte($subscription->start_date))
+@php
+    $latestSessionDate = today()->lt($subscription->end_date) ? today() : $subscription->end_date;
+    $periodHasStarted = today()->gte($subscription->start_date);
+@endphp
 
 <div class="awan-page">
     <header class="form-page-header"><div><span class="eyebrow">{{ $subscription->member->member_code }}</span><h1>{{ $subscription->member->user->full_name }}</h1><p>{{ $subscription->package->package_name }} · Pendampingan personal trainer</p></div><a class="secondary-btn" href="{{ route('trainer-members.index') }}" wire:navigate>Kembali</a></header>

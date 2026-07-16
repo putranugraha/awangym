@@ -64,7 +64,9 @@ new class extends Component
                 <thead><tr><th>Member</th><th>Paket</th><th>Pertemuan</th><th>Periode</th><th class="action-column">Aksi</th></tr></thead>
                 <tbody>
                     @forelse($subscriptions as $subscription)
-                        @php($remaining = max(($subscription->trainer_session_limit ?? 0) - $subscription->trainer_sessions_count, 0))
+                        @php
+                            $remaining = max(($subscription->trainer_session_limit ?? 0) - $subscription->trainer_sessions_count, 0);
+                        @endphp
                         <tr wire:key="subscription-{{ $subscription->subscription_id }}">
                             <td data-label="Member"><div class="member-cell"><span class="member-table-avatar">{{ $subscription->member->user->initials() }}</span><span><strong>{{ $subscription->member->user->full_name }}</strong><small>{{ $subscription->member->member_code }}</small></span></div></td>
                             <td data-label="Paket"><span class="table-primary">{{ $subscription->package->package_name }}</span><small class="table-secondary">Dengan personal trainer</small></td>

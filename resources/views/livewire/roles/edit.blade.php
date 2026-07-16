@@ -55,7 +55,9 @@ new class extends Component
             <div class="form-section-title member-section-gap"><span>02</span><div><h2>Permission</h2><p>Pilih akses yang dimiliki role ini.</p></div></div>
             <div class="permission-choice-grid">
                 @foreach($permissions as $permission)
-                    @php($locked = $role->name === 'admin' && in_array($permission->name, ['view dashboard', 'manage roles and permissions'], true))
+                    @php
+                        $locked = $role->name === 'admin' && in_array($permission->name, ['view dashboard', 'manage roles and permissions'], true);
+                    @endphp
                     <label wire:key="permission-{{ $permission->id }}"><input type="checkbox" value="{{ $permission->name }}" wire:model.live="selectedPermissions" @disabled($locked)><span>{{ str($permission->name)->title() }}</span></label>
                 @endforeach
             </div>
