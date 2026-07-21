@@ -29,7 +29,7 @@ new class extends Component
 
         validator($data, [])->after(function (Validator $validator) use ($data) {
             if (filled($data['link']) && ProgramExercise::toEmbedUrl($data['link']) === null) {
-                $validator->errors()->add('link', 'Gunakan link video YouTube atau Vimeo yang valid agar dapat ditampilkan di halaman.');
+                $validator->errors()->add('link', 'Masukkan URL video HTTP atau HTTPS yang valid.');
             }
         })->validate();
 
@@ -49,7 +49,7 @@ new class extends Component
 
     <form wire:submit="save" class="form-layout">
         <section class="form-card">
-            <div class="form-section-title"><span>01</span><div><h2>Link Video</h2><p>Masukkan URL YouTube atau Vimeo. Video akan ditampilkan langsung pada program latihan.</p></div></div>
+            <div class="form-section-title"><span>01</span><div><h2>Link Video</h2><p>Masukkan URL video. YouTube, Shorts, Vimeo, dan platform lain yang mendukung embed akan ditampilkan langsung pada program latihan.</p></div></div>
             <label><span>Link video</span><input class="form-input" type="url" wire:model="link" placeholder="https://www.youtube.com/watch?v=..." autocomplete="url"></label>
             @error('link')<div class="error-box">{{ $message }}</div>@enderror
         </section>

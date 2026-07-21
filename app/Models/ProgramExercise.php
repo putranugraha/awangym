@@ -19,12 +19,21 @@ class ProgramExercise extends Model
         }
 
         $parts = parse_url($link);
+        $scheme = strtolower($parts['scheme'] ?? '');
         $host = strtolower($parts['host'] ?? '');
         $path = trim($parts['path'] ?? '', '/');
 
-        if (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com'], true)) {
+        if (! in_array($scheme, ['http', 'https'], true) || blank($host)) {
+            return null;
+        }
+
+        if (in_array($host, ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'www.youtube-nocookie.com'], true)) {
             parse_str($parts['query'] ?? '', $query);
-            $videoId = $query['v'] ?? (str_starts_with($path, 'embed/') ? substr($path, 6) : null);
+            $segments = explode('/', $path);
+            $videoId = $query['v'] ?? $query['vi'] ?? match ($segments[0] ?? null) {
+                'embed', 'shorts', 'live' => $segments[1] ?? null,
+                default => null,
+            };
 
             return filled($videoId) ? 'https://www.youtube.com/embed/'.rawurlencode($videoId) : null;
         }
@@ -34,12 +43,12 @@ class ProgramExercise extends Model
         }
 
         if (in_array($host, ['vimeo.com', 'www.vimeo.com', 'player.vimeo.com'], true)) {
-            $videoId = str_starts_with($path, 'video/') ? substr($path, 6) : explode('/', $path)[0];
+            $videoId = collect(explode('/', $path))->reverse()->first(fn ($segment) => ctype_digit($segment));
 
             return filled($videoId) && ctype_digit($videoId) ? 'https://player.vimeo.com/video/'.$videoId : null;
         }
 
-        return null;
+        return $link;
     }
 
     public function embedUrl(): ?string
