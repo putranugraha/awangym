@@ -56,6 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('permission:view workout catalog')->group(function () {
         Route::livewire('workout-programs', 'app::workout-programs.index')->name('workout-programs.index');
         Route::livewire('workout-programs/{program}', 'app::workout-programs.show')->name('workout-programs.show');
+        Route::livewire('workout-programs/{program}/exercises/{programExercise}/edit', 'app::workout-programs.exercises.edit')->name('workout-program-exercises.edit');
     });
 
     Route::livewire('member-programs/create', 'app::member-programs.create')

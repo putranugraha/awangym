@@ -4,6 +4,13 @@ use Livewire\Component;
 
 new class extends Component
 {
+    public ?int $openVideoId = null;
+
+    public function toggleVideo(int $programExerciseId): void
+    {
+        $this->openVideoId = $this->openVideoId === $programExerciseId ? null : $programExerciseId;
+    }
+
     public function with(): array
     {
         $member = auth()->user()->member;
@@ -99,10 +106,19 @@ new class extends Component
                                 <div class="program-day-header"><div><strong>Hari {{ (($day - 1) % 7) + 1 }}</strong><small>{{ $items->first()->session_name }}</small></div><span>{{ $items->count() }} exercise</span></div>
                                 <div class="my-program-exercise-list">
                                     @foreach($items as $item)
-                                        <article class="my-program-exercise member-reference-exercise">
+                                        <article class="my-program-exercise member-reference-exercise {{ $item->embedUrl() ? 'my-program-exercise-has-video' : '' }}" @if($item->embedUrl()) wire:click="toggleVideo({{ $item->program_exercise_id }})" role="button" tabindex="0" aria-expanded="{{ $openVideoId === $item->program_exercise_id ? 'true' : 'false' }}" @endif>
                                             <span class="my-program-exercise-order">{{ $loop->iteration }}</span>
-                                            <div><strong>{{ $item->exercise->exercise_name }}</strong><small>{{ $item->sets ? $item->sets.' set × '.$item->repetitions : $item->duration_minutes.' menit' }} · Istirahat {{ $item->rest_seconds }} detik</small></div>
-                                            <span class="my-program-validation">Contoh</span>
+                                            @if($embedUrl = $item->embedUrl())
+                                                <div class="my-program-exercise-trigger">
+                                                    <div><strong>{{ $item->exercise->exercise_name }}</strong><small>{{ $item->sets ? $item->sets.' set × '.$item->repetitions : $item->duration_minutes.' menit' }} · Istirahat {{ $item->rest_seconds }} detik</small></div>
+                                                </div>
+                                                <svg class="program-video-chevron {{ $openVideoId === $item->program_exercise_id ? 'is-open' : '' }}" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" /></svg>
+                                                @if($openVideoId === $item->program_exercise_id)
+                                                    <div class="program-video my-program-exercise-video"><iframe src="{{ $embedUrl }}" title="Video {{ $item->exercise->exercise_name }}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe></div>
+                                                @endif
+                                            @else
+                                                <div><strong>{{ $item->exercise->exercise_name }}</strong><small>{{ $item->sets ? $item->sets.' set × '.$item->repetitions : $item->duration_minutes.' menit' }} · Istirahat {{ $item->rest_seconds }} detik</small></div>
+                                            @endif
                                         </article>
                                     @endforeach
                                 </div>
