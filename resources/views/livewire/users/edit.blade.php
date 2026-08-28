@@ -106,7 +106,7 @@ new class extends Component
     $securityComplete = $password === '' || strlen($password) >= 8;
     $statusComplete = filled($account_status) && filled($role_name);
     $completedSections = collect([$identityComplete, $securityComplete, $statusComplete])->filter()->count();
-    $roleLabel = match($role_name) {'personal_trainer' => 'Personal Trainer', 'member' => 'Member', default => ucfirst($role_name)};
+    $roleLabel = $role_name ? str($role_name)->replace('_', ' ')->title() : 'Tanpa Role';
     $profileCode = $user->member?->member_code ?? $user->personalTrainer?->trainer_code ?? 'Akun operasional';
 @endphp
 
@@ -129,7 +129,7 @@ new class extends Component
 
             <div class="form-section-title member-section-gap"><span>03</span><div><h2>Akses Akun</h2><p>Tentukan role dan status login.</p></div></div>
             <div class="form-grid">
-                <label><span>Role Akses <em>*</em></span><select class="form-input" wire:model.live="role_name"><option value="">Pilih role</option>@foreach($roles as $r)<option value="{{ $r->name }}">{{ ucfirst($r->name) }}</option>@endforeach</select></label>
+                <label><span>Role Akses <em>*</em></span><select class="form-input" wire:model.live="role_name"><option value="">Pilih role</option>@foreach($roles as $r)<option value="{{ $r->name }}">{{ str($r->name)->replace('_', ' ')->title() }}</option>@endforeach</select></label>
                 <label><span>Status akun <em>*</em></span><select class="form-input" wire:model.live="account_status"><option value="active">Aktif — dapat login</option><option value="inactive">Nonaktif — akses diblokir</option></select></label>
             </div>
         </section>

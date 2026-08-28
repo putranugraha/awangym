@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Spatie\Permission\Models\Role;
 
 new class extends Component
 {
@@ -81,6 +82,7 @@ new class extends Component
 
         return [
             'users' => $users,
+            'roles' => Role::query()->orderBy('name')->get(),
             'totalUsers' => User::count(),
             'activeUsers' => User::where('account_status', 'active')->count(),
             'inactiveUsers' => User::where('account_status', 'inactive')->count(),
@@ -117,7 +119,7 @@ new class extends Component
                 <input wire:model.live.debounce.300ms="search" placeholder="Cari nama, email, atau telepon…">
             </label>
             <div class="transaction-filters">
-                <label class="data-filter"><span>Role</span><select wire:model.live="role"><option value="all">Semua role</option><option value="admin">Admin</option><option value="personal_trainer">Personal Trainer</option><option value="member">Member</option></select></label>
+                <label class="data-filter"><span>Role</span><select wire:model.live="role"><option value="all">Semua role</option>@foreach($roles as $availableRole)<option value="{{ $availableRole->name }}">{{ str($availableRole->name)->replace('_', ' ')->title() }}</option>@endforeach</select></label>
                 <label class="data-filter"><span>Status</span><select wire:model.live="status"><option value="all">Semua status</option><option value="active">Aktif</option><option value="inactive">Nonaktif</option></select></label>
             </div>
         </div>
@@ -129,13 +131,18 @@ new class extends Component
                     @forelse($users as $user)
                         @php
                             $roleName = $user->roles->first()?->name;
-                            $roleLabel = match($roleName) {'personal_trainer' => 'Personal Trainer', 'member' => 'Member', default => 'Admin'};
+                            $roleLabel = $roleName
+                                ? str($roleName)->replace('_', ' ')->title()
+                                : 'Tanpa Role';
+                            $roleClass = $roleName
+                                ? str($roleName)->slug('_')
+                                : 'unassigned';
                             $profileCode = $user->member?->member_code ?? $user->personalTrainer?->trainer_code;
                         @endphp
                         <tr wire:key="user-{{ $user->user_id }}">
                             <td data-label="User"><div class="member-cell"><span class="member-table-avatar">{{ $user->initials() }}</span><span><strong>{{ $user->full_name }}</strong><small>ID #{{ $user->user_id }}</small></span></div></td>
                             <td data-label="Kontak"><span class="table-primary">{{ $user->email }}</span><small class="table-secondary">{{ $user->phone }}</small></td>
-                            <td data-label="Role"><span class="user-role user-role-{{ $roleName }}">{{ $roleLabel }}</span></td>
+                            <td data-label="Role"><span class="user-role user-role-{{ $roleClass }}">{{ $roleLabel }}</span></td>
                             <td data-label="Profil"><span class="table-primary">{{ $profileCode ?? 'Akun operasional' }}</span></td>
                             <td data-label="Status"><span class="account-status account-status-{{ $user->account_status }}">{{ $user->account_status === 'active' ? 'Dapat login' : 'Diblokir' }}</span></td>
                             <td data-label="Aksi" class="action-column">

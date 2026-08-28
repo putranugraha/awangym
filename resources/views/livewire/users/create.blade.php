@@ -84,12 +84,12 @@ new class extends Component
 
 <div class="awan-page">
     <header class="form-page-header">
-        <div><span class="eyebrow">USER BARU</span><h1>Tambah User</h1><p>Buat akun administrator untuk operasional Awan Gym.</p></div>
+        <div><span class="eyebrow">USER BARU</span><h1>Tambah User</h1><p>Buat akun user dan tentukan aksesnya di Awan Gym.</p></div>
         <a class="secondary-btn member-back-desktop" href="{{ route('users.index') }}" wire:navigate>Kembali</a>
     </header>
     <form wire:submit="save" class="form-layout">
         <section class="form-card user-form-main">
-            <div class="form-section-title"><span>01</span><div><h2>Identitas User</h2><p>Informasi dasar akun administrator.</p></div></div>
+            <div class="form-section-title"><span>01</span><div><h2>Identitas User</h2><p>Informasi dasar akun user.</p></div></div>
             <label><span>Nama lengkap <em>*</em></span><input class="form-input" wire:model.live.debounce.300ms="full_name" placeholder="Contoh: Admin Operasional" autocomplete="name"></label>
             <div class="form-grid">
                 <label><span>Email <em>*</em></span><input class="form-input" type="email" wire:model.live.debounce.300ms="email" placeholder="admin@awangym.com" autocomplete="email"></label>
@@ -101,7 +101,7 @@ new class extends Component
 
             <div class="form-section-title member-section-gap"><span>03</span><div><h2>Akses Akun</h2><p>Tentukan role dan status login.</p></div></div>
             <div class="form-grid">
-                <label><span>Role Akses <em>*</em></span><select class="form-input" wire:model.live="role_name"><option value="">Pilih role</option>@foreach($roles as $r)<option value="{{ $r->name }}">{{ ucfirst($r->name) }}</option>@endforeach</select></label>
+                <label><span>Role Akses <em>*</em></span><select class="form-input" wire:model.live="role_name"><option value="">Pilih role</option>@foreach($roles as $r)<option value="{{ $r->name }}">{{ str($r->name)->replace('_', ' ')->title() }}</option>@endforeach</select></label>
                 <label><span>Status akun <em>*</em></span><select class="form-input" wire:model.live="account_status"><option value="">Pilih status</option><option value="active">Aktif — dapat login</option><option value="inactive">Nonaktif — akses diblokir</option></select></label>
             </div>
         </section>
@@ -109,8 +109,8 @@ new class extends Component
             <section class="form-card user-role-card">
                 <span class="member-identity-avatar">{{ strtoupper(substr($role_name ?: '?', 0, 1)) }}</span>
                 <div>
-                    <strong>{{ $role_name ? ucfirst($role_name) : 'Pilih Role' }}</strong>
-                    <small>{{ $role_name ? 'Hak akses tingkat ' . $role_name : 'Belum ada role terpilih' }}</small>
+                    <strong>{{ $role_name ? str($role_name)->replace('_', ' ')->title() : 'Pilih Role' }}</strong>
+                    <small>{{ $role_name ? 'Hak akses tingkat ' . str($role_name)->replace('_', ' ')->title() : 'Belum ada role terpilih' }}</small>
                 </div>
             </section>
             <section class="form-card member-progress-card">
