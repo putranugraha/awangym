@@ -22,6 +22,7 @@ class AccessControl
         'view own workout program',
         'view workout catalog',
         'view assigned members',
+        'view own salary',
         'validate member exercises',
     ];
 }

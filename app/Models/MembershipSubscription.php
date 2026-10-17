@@ -55,7 +55,32 @@ class MembershipSubscription extends Model
 
     public function payment()
     {
-        return $this->hasOne(PaymentTransaction::class, 'subscription_id');
+        return $this->hasOne(PaymentTransaction::class, 'subscription_id')->whereNull('trainer_addon_id');
+    }
+
+    public function trainerAddon()
+    {
+        return $this->hasOne(MembershipTrainerAddon::class, 'subscription_id');
+    }
+
+    public function getTrainerStartDateAttribute()
+    {
+        return $this->trainerAddon?->start_date ?? $this->start_date;
+    }
+
+    public function getTrainerEndDateAttribute()
+    {
+        return $this->trainerAddon?->end_date ?? $this->end_date;
+    }
+
+    public function scopeCurrentTrainer(Builder $query): Builder
+    {
+        return $query->current()->whereNotNull('trainer_id')->where(function (Builder $query) {
+            $query->whereDoesntHave('trainerAddon')->orWhereHas('trainerAddon', function (Builder $addon) {
+                $addon->whereDate('start_date', '<=', today())->whereDate('end_date', '>=', today())
+                    ->whereHas('payment', fn (Builder $payment) => $payment->where('payment_status', 'paid'));
+            });
+        });
     }
 
     public function trainerSessions()

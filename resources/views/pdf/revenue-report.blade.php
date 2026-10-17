@@ -73,7 +73,7 @@
                         <td>{{ $loop->iteration }}</td>
                         <td class="invoice">{{ $transaction->invoice_number }}</td>
                         <td><span class="member">{{ $transaction->member->user->full_name }}</span><br><span class="muted">{{ $transaction->member->member_code }}</span></td>
-                        <td>{{ $transaction->subscription->package->package_name }}</td>
+                        <td>{{ $transaction->subscription->package->package_name }}@if($transaction->trainer_addon_id)<br><span class="muted">Tambahan PT</span>@endif</td>
                         <td>{{ $transaction->payment_date->translatedFormat('d M Y') }}<br><span class="muted">{{ $transaction->payment_date->format('H:i') }}</span></td>
                         <td>{{ match($transaction->payment_method) {'cash' => 'Tunai', 'e_wallet' => 'E-wallet', default => 'Transfer'} }}</td>
                         <td class="right amount">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</td>

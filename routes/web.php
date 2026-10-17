@@ -2,17 +2,20 @@
 
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MemberPortalController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RevenueReportPdfController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('profile', ProfileController::class)->name('profile.show');
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::middleware('permission:manage users')->group(function () {
         Route::livewire('users', 'app::users.index')->name('users.index');
         Route::livewire('users/create', 'app::users.create')->name('users.create');
+        Route::get('users/{user}/profile', [ProfileController::class, 'show'])->name('users.profile');
         Route::livewire('users/{user}/edit', 'app::users.edit')->name('users.edit');
     });
 
@@ -70,6 +73,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::livewire('trainer-members', 'app::trainer-members.index')->name('trainer-members.index');
         Route::livewire('trainer-members/{subscription}', 'app::trainer-members.show')->name('trainer-members.show');
     });
+
+    Route::livewire('salary', 'app::salary.index')
+        ->middleware(['role:personal_trainer', 'permission:view own salary'])
+        ->name('salary.index');
 
     Route::get('membership', [MemberPortalController::class, 'membership'])
         ->middleware('permission:view own membership')

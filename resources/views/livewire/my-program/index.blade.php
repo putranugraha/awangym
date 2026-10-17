@@ -24,7 +24,7 @@ new class extends Component
                 ->unique('program_id')
                 ->values(),
             'trainerSubscription' => $member->subscriptions()
-                ->with(['package', 'trainer.user', 'trainerSessions'])
+                ->with(['package', 'trainer.user', 'trainerSessions', 'trainerAddon'])
                 ->whereNotNull('trainer_id')
                 ->current()
                 ->latest('end_date')
@@ -45,8 +45,11 @@ new class extends Component
             $remainingSessions = max(($trainerSubscription->trainer_session_limit ?? 0) - $trainerSessions->count(), 0);
         @endphp
         <section class="member-trainer-panel">
+            @if($trainerSubscription->trainerAddon)
+                <p class="member-trainer-empty">Status tambahan PT: {{ today()->lt($trainerSubscription->trainer_start_date) ? 'Belum dimulai' : (today()->gt($trainerSubscription->trainer_end_date) ? 'Sudah berakhir' : 'Sedang berlaku') }}. Catatan pertemuan tetap tersedia di bawah.</p>
+            @endif
             <div class="member-trainer-panel-head">
-                <div><span class="eyebrow">PENDAMPINGAN PT</span><h2>{{ $trainerSubscription->trainer->user->full_name }}</h2><p>{{ $trainerSubscription->package->package_name }} · {{ $trainerSubscription->start_date->format('d M Y') }}–{{ $trainerSubscription->end_date->format('d M Y') }}</p></div>
+                <div><span class="eyebrow">PENDAMPINGAN PT</span><h2>{{ $trainerSubscription->trainer->user->full_name }}</h2><p>{{ $trainerSubscription->package->package_name }} · PT {{ $trainerSubscription->trainer_start_date->format('d M Y') }}–{{ $trainerSubscription->trainer_end_date->format('d M Y') }}</p></div>
                 <div class="member-trainer-quota"><strong>{{ $trainerSessions->count() }}/{{ $trainerSubscription->trainer_session_limit }}</strong><span>Pertemuan</span><small>Sisa {{ $remainingSessions }} sesi</small></div>
             </div>
 

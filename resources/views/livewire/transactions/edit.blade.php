@@ -16,7 +16,7 @@ new class extends Component
 
     public function mount(PaymentTransaction $transaction): void
     {
-        $this->transaction = $transaction->load(['member.user', 'subscription.package']);
+        $this->transaction = $transaction->load(['member.user', 'subscription.package', 'subscription.payment', 'trainerAddon.trainer.user']);
         $this->fill($transaction->only(['payment_method', 'payment_status']));
         $this->notes = $transaction->notes ?? '';
     }
@@ -51,21 +51,28 @@ new class extends Component
 
 <div class="awan-page">
     <header class="form-page-header">
-        <div><span class="eyebrow">{{ $transaction->invoice_number }}</span><h1>Edit Transaksi</h1><p>Perbarui metode, status pembayaran, atau catatan transaksi.</p></div>
+        <div><span class="eyebrow">{{ $transaction->invoice_number }}</span><h1>{{ $transaction->trainer_addon_id ? 'Tagihan Tambahan PT' : 'Edit Transaksi' }}</h1><p>{{ $transaction->trainer_addon_id ? 'Pembayaran khusus layanan PT. Biaya gym tidak ditagih ulang.' : 'Perbarui metode, status pembayaran, atau catatan transaksi.' }}</p></div>
         <a class="secondary-btn member-back-desktop" href="{{ route('transactions.index') }}" wire:navigate>Kembali</a>
     </header>
+    @if(session('success'))<div class="trainer-session-success">{{ session('success') }}</div>@endif
     <form wire:submit="save" class="form-layout">
         <section class="form-card transaction-form-main">
             <div class="form-section-title"><span>01</span><div><h2>Detail Transaksi</h2><p>Informasi utama transaksi tidak dapat diubah dari halaman ini.</p></div></div>
             <div class="transaction-edit-summary">
                 <div class="member-cell"><span class="member-table-avatar">{{ $transaction->member->user->initials() }}</span><span><strong>{{ $transaction->member->user->full_name }}</strong><small>{{ $transaction->member->member_code }}</small></span></div>
                 <dl>
+                    <div><dt>Jenis transaksi</dt><dd>{{ $transaction->purpose_label }}</dd></div>
+                    @if($transaction->trainerAddon)
+                        <div><dt>Trainer tambahan</dt><dd>{{ $transaction->trainerAddon->trainer->user->full_name }}</dd></div>
+                        <div><dt>Periode PT</dt><dd>{{ $transaction->trainerAddon->start_date->format('d M Y') }} — {{ $transaction->trainerAddon->end_date->format('d M Y') }} · {{ $transaction->trainerAddon->session_limit }} sesi</dd></div>
+                        <div><dt>Transaksi gym</dt><dd><a class="table-action table-action-primary" href="{{ route('transactions.edit', $transaction->subscription->payment) }}" wire:navigate>{{ $transaction->subscription->payment->invoice_number }}</a></dd></div>
+                    @endif
                     <div><dt>Paket</dt><dd>{{ $transaction->subscription->package->package_name }}</dd></div>
-                    @if($transaction->subscription->trainer)
+                    @if(! $transaction->trainer_addon_id && $transaction->subscription->trainer)
                         <div><dt>Trainer</dt><dd>{{ $transaction->subscription->trainer->trainer_code }} — {{ $transaction->subscription->trainer->user->full_name }}</dd></div>
                     @endif
-                    <div><dt>Nominal</dt><dd>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</dd></div>
-                    <div><dt>Periode</dt><dd>{{ $transaction->subscription->start_date->format('d M Y') }} — {{ $transaction->subscription->end_date->format('d M Y') }}</dd></div>
+                    <div><dt>{{ $transaction->trainer_addon_id ? 'Biaya tambahan PT' : 'Nominal' }}</dt><dd>Rp {{ number_format($transaction->amount, 0, ',', '.') }}</dd></div>
+                    <div><dt>Periode gym</dt><dd>{{ $transaction->subscription->start_date->format('d M Y') }} — {{ $transaction->subscription->end_date->format('d M Y') }}</dd></div>
                 </dl>
             </div>
             <div class="form-section-title member-section-gap"><span>02</span><div><h2>Status Pembayaran</h2><p>Atur metode dan status transaksi.</p></div></div>
@@ -88,5 +95,8 @@ new class extends Component
             <a class="secondary-btn member-back-mobile" href="{{ route('transactions.index') }}" wire:navigate>Kembali</a>
         </aside>
     </form>
+    @if(! $transaction->trainer_addon_id)
+        <livewire:app::transactions.trainer-addon :transaction="$transaction" :key="'trainer-addon-'.$transaction->transaction_id" />
+    @endif
 </div>
 

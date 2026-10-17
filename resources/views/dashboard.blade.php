@@ -36,6 +36,9 @@
                         <div><span class="eyebrow">PERSONAL TRAINER</span><h2>{{ $subscription->trainer->user->full_name }}</h2><p>{{ $subscription->trainer->trainer_code }} · Pendamping paket aktif</p></div>
                         <span class="usage-count usage-count-active">{{ $subscription->trainerSessions->count() }}/{{ $subscription->trainer_session_limit }} sesi</span>
                     </div>
+                    @if($subscription->trainerAddon)
+                        <p class="member-trainer-empty">Tambahan PT: {{ $subscription->trainer_start_date->translatedFormat('d M Y') }} – {{ $subscription->trainer_end_date->translatedFormat('d M Y') }} · {{ today()->lt($subscription->trainer_start_date) ? 'Belum dimulai' : (today()->gt($subscription->trainer_end_date) ? 'Sudah berakhir' : 'Sedang berlaku') }}</p>
+                    @endif
                     @if($subscription->trainerSessions->isNotEmpty())
                         @php
                             $latestSession = $subscription->trainerSessions->sortByDesc('session_date')->first();

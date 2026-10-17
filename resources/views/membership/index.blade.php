@@ -10,6 +10,9 @@
 
         @if($currentSubscription?->trainer)
             <article class="member-trainer-card">
+                @if($currentSubscription->trainerAddon)
+                    <p class="member-trainer-empty">Tambahan PT: {{ $currentSubscription->trainer_start_date->translatedFormat('d M Y') }} – {{ $currentSubscription->trainer_end_date->translatedFormat('d M Y') }} · {{ today()->lt($currentSubscription->trainer_start_date) ? 'Belum dimulai' : (today()->gt($currentSubscription->trainer_end_date) ? 'Sudah berakhir' : 'Sedang berlaku') }}</p>
+                @endif
                 <div class="member-trainer-card-head">
                     <div><span class="eyebrow">PERSONAL TRAINER</span><h2>{{ $currentSubscription->trainer->user->full_name }}</h2><p>{{ $currentSubscription->trainer->trainer_code }} · {{ $currentSubscription->trainerSessions->count() }}/{{ $currentSubscription->trainer_session_limit }} pertemuan</p></div>
                     <a class="table-action table-action-primary" href="{{ route('my-program.index') }}" wire:navigate>Lihat catatan PT</a>

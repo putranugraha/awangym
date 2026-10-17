@@ -44,7 +44,7 @@ class DatabaseSeeder extends Seeder
             'assign workout programs',
         ]);
         $memberRole->syncPermissions(['view dashboard', 'view own membership', 'view own payments', 'view own workout program']);
-        $trainerRole->syncPermissions(['view dashboard', 'view workout catalog', 'view assigned members', 'validate member exercises']);
+        $trainerRole->syncPermissions(['view dashboard', 'view workout catalog', 'view assigned members', 'validate member exercises', 'view own salary']);
         Permission::whereIn('name', ['manage exercises', 'manage workout programs'])->delete();
 
         $admin = User::updateOrCreate(['email' => 'admin@awangym.test'], [

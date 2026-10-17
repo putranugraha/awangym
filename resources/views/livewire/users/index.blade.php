@@ -139,16 +139,20 @@ new class extends Component
                                 : 'unassigned';
                             $profileCode = $user->member?->member_code ?? $user->personalTrainer?->trainer_code;
                         @endphp
-                        <tr wire:key="user-{{ $user->user_id }}">
-                            <td data-label="User"><div class="member-cell"><span class="member-table-avatar">{{ $user->initials() }}</span><span><strong>{{ $user->full_name }}</strong><small>ID #{{ $user->user_id }}</small></span></div></td>
+                        <tr wire:key="user-{{ $user->user_id }}" class="user-profile-row" x-data
+                            @click="if (!$event.target.closest('a, button, [data-user-actions]') && !window.getSelection()?.toString()) $el.querySelector('[data-user-profile-link]').click()">
+                            <td data-label="User"><a class="member-cell user-profile-link" href="{{ route('users.profile', $user) }}" data-user-profile-link aria-label="Lihat profil {{ $user->full_name }}" wire:navigate><span class="member-table-avatar">{{ $user->initials() }}</span><span><strong>{{ $user->full_name }}</strong><small>ID #{{ $user->user_id }} · Lihat profil</small></span></a></td>
                             <td data-label="Kontak"><span class="table-primary">{{ $user->email }}</span><small class="table-secondary">{{ $user->phone }}</small></td>
                             <td data-label="Role"><span class="user-role user-role-{{ $roleClass }}">{{ $roleLabel }}</span></td>
                             <td data-label="Profil"><span class="table-primary">{{ $profileCode ?? 'Akun operasional' }}</span></td>
                             <td data-label="Status"><span class="account-status account-status-{{ $user->account_status }}">{{ $user->account_status === 'active' ? 'Dapat login' : 'Diblokir' }}</span></td>
-                            <td data-label="Aksi" class="action-column">
+                            <td data-label="Aksi" class="action-column" data-user-actions>
                                 <flux:dropdown align="end">
                                     <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="right" />
                                     <flux:menu>
+                                        <flux:menu.item href="{{ route('users.profile', $user) }}" icon="user-circle" wire:navigate>
+                                            Lihat Profil
+                                        </flux:menu.item>
                                         <flux:menu.item href="{{ route('users.edit', $user) }}" icon="pencil-square" wire:navigate>
                                             Edit User
                                         </flux:menu.item>

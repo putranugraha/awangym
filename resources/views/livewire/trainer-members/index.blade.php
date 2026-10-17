@@ -16,10 +16,10 @@ new class extends Component
         }
 
         $query = MembershipSubscription::query()
-            ->with(['member.user', 'package', 'payment'])
+            ->with(['member.user', 'package', 'payment', 'trainerAddon'])
             ->withCount('trainerSessions')
             ->where('trainer_id', $trainer->trainer_id)
-            ->current()
+            ->currentTrainer()
             ->when($this->search, function ($query) {
                 $query->where(function ($search) {
                     $search->whereHas('member.user', fn ($user) => $user->where('full_name', 'like', "%{$this->search}%"))
@@ -71,7 +71,7 @@ new class extends Component
                             <td data-label="Member"><div class="member-cell"><span class="member-table-avatar">{{ $subscription->member->user->initials() }}</span><span><strong>{{ $subscription->member->user->full_name }}</strong><small>{{ $subscription->member->member_code }}</small></span></div></td>
                             <td data-label="Paket"><span class="table-primary">{{ $subscription->package->package_name }}</span><small class="table-secondary">Dengan personal trainer</small></td>
                             <td data-label="Pertemuan"><span class="usage-count usage-count-active">{{ $subscription->trainer_sessions_count }}/{{ $subscription->trainer_session_limit }}</span><small class="table-secondary">Sisa {{ $remaining }} sesi</small></td>
-                            <td data-label="Periode"><span class="table-primary">{{ $subscription->start_date->format('d M Y') }}</span><small class="table-secondary">s/d {{ $subscription->end_date->format('d M Y') }}</small></td>
+                            <td data-label="Periode"><span class="table-primary">{{ $subscription->trainer_start_date->format('d M Y') }}</span><small class="table-secondary">s/d {{ $subscription->trainer_end_date->format('d M Y') }}</small></td>
                             <td data-label="Aksi" class="action-column"><a class="table-action table-action-primary" href="{{ route('trainer-members.show', $subscription) }}" wire:navigate>Detail Pertemuan</a></td>
                         </tr>
                     @empty

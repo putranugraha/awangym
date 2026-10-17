@@ -18,11 +18,13 @@ new class extends Component
         $trainerId = auth()->user()->personalTrainer?->trainer_id;
         abort_unless($trainerId && $subscription->trainer_id === $trainerId, 403);
         abort_unless($subscription->payment?->payment_status === 'paid', 403);
+        abort_if($subscription->subscription_status === 'cancelled', 403);
+        abort_if($subscription->trainerAddon && $subscription->trainerAddon->payment?->payment_status !== 'paid', 403);
 
         $this->subscription = $subscription->load(['member.user', 'package', 'trainerSessions']);
-        $this->session_date = today()->between($subscription->start_date, $subscription->end_date)
+        $this->session_date = today()->between($subscription->trainer_start_date, $subscription->trainer_end_date)
             ? today()->toDateString()
-            : $subscription->start_date->toDateString();
+            : $subscription->trainer_start_date->toDateString();
     }
 
     public function saveSession(): void
@@ -35,8 +37,8 @@ new class extends Component
             'session_date' => [
                 'required',
                 'date',
-                'after_or_equal:'.$this->subscription->start_date->toDateString(),
-                'before_or_equal:'.$this->subscription->end_date->toDateString(),
+                'after_or_equal:'.$this->subscription->trainer_start_date->toDateString(),
+                'before_or_equal:'.$this->subscription->trainer_end_date->toDateString(),
                 'before_or_equal:today',
                 Rule::unique('trainer_sessions', 'session_date')->where('subscription_id', $this->subscription->subscription_id),
             ],
@@ -50,6 +52,12 @@ new class extends Component
 
         DB::transaction(function () use ($data, $trainerId) {
             $subscription = MembershipSubscription::query()->lockForUpdate()->findOrFail($this->subscription->subscription_id);
+            abort_unless($subscription->trainer_id === $trainerId && $subscription->payment?->payment_status === 'paid', 403);
+            abort_if($subscription->subscription_status === 'cancelled', 403);
+            abort_if($subscription->trainerAddon && $subscription->trainerAddon->payment?->payment_status !== 'paid', 403);
+            if (! \Illuminate\Support\Carbon::parse($data['session_date'])->betweenIncluded($subscription->trainer_start_date, $subscription->trainer_end_date)) {
+                throw ValidationException::withMessages(['session_date' => 'Tanggal pertemuan harus berada dalam periode layanan PT.']);
+            }
             $used = TrainerSession::where('subscription_id', $subscription->subscription_id)->count();
 
             if ($used >= ($subscription->trainer_session_limit ?? 0)) {
@@ -88,8 +96,8 @@ new class extends Component
 ?>
 
 @php
-    $latestSessionDate = today()->lt($subscription->end_date) ? today() : $subscription->end_date;
-    $periodHasStarted = today()->gte($subscription->start_date);
+    $latestSessionDate = today()->lt($subscription->trainer_end_date) ? today() : $subscription->trainer_end_date;
+    $periodHasStarted = today()->gte($subscription->trainer_start_date);
 @endphp
 
 <div class="awan-page">
@@ -98,8 +106,8 @@ new class extends Component
     @if(session('success'))<div class="trainer-session-success">{{ session('success') }}</div>@endif
 
     <div class="program-content-stats">
-        <article><span>Periode mulai</span><strong class="trainer-session-stat-date">{{ $subscription->start_date->format('d M Y') }}</strong><small>Tanggal sesi pertama paling awal</small></article>
-        <article><span>Batas akhir</span><strong class="trainer-session-stat-date">{{ $subscription->end_date->format('d M Y') }}</strong><small>Tanggal sesi terakhir maksimal</small></article>
+        <article><span>Periode mulai</span><strong class="trainer-session-stat-date">{{ $subscription->trainer_start_date->format('d M Y') }}</strong><small>Tanggal sesi pertama paling awal</small></article>
+        <article><span>Batas akhir</span><strong class="trainer-session-stat-date">{{ $subscription->trainer_end_date->format('d M Y') }}</strong><small>Tanggal sesi terakhir maksimal</small></article>
         <article><span>Kuota pertemuan</span><strong>{{ $sessions->count() }}/{{ $sessionLimit }}</strong><small>Tersisa {{ $remainingSessions }} pertemuan</small></article>
     </div>
 
@@ -108,7 +116,7 @@ new class extends Component
             <div class="form-section-title"><span>+</span><div><h2>Catat Pertemuan</h2><p>Nomor pertemuan dibuat otomatis berdasarkan urutan tanggal.</p></div></div>
             @if($remainingSessions > 0 && $periodHasStarted)
                 <form wire:submit="saveSession">
-                    <label><span>Tanggal pertemuan <em>*</em></span><input class="form-input" type="date" min="{{ $subscription->start_date->toDateString() }}" max="{{ $latestSessionDate->toDateString() }}" wire:model="session_date"></label>
+                    <label><span>Tanggal pertemuan <em>*</em></span><input class="form-input" type="date" min="{{ $subscription->trainer_start_date->toDateString() }}" max="{{ $latestSessionDate->toDateString() }}" wire:model="session_date"></label>
                     <label><span>Catatan latihan <em>*</em></span><textarea class="form-input" rows="5" wire:model="notes" placeholder="Contoh: Pertemuan pertama, latihan upper body. Gerakan bench press sudah baik, posisi bahu masih perlu diperbaiki."></textarea><small class="trainer-session-help">Catat kegiatan, perkembangan, dan hal yang perlu diperbaiki pada sesi berikutnya.</small></label>
                     @if($errors->any())<div class="error-box">{{ $errors->first() }}</div>@endif
                     <button class="primary-btn form-submit" wire:loading.attr="disabled"><span wire:loading.remove>Simpan Pertemuan ke-{{ $sessions->count() + 1 }}</span><span wire:loading>Menyimpan…</span></button>
@@ -116,7 +124,7 @@ new class extends Component
             @elseif($remainingSessions === 0)
                 <div class="trainer-session-limit"><strong>Kuota pertemuan sudah habis</strong><p>Seluruh {{ $sessionLimit }} sesi pada paket ini sudah tercatat.</p></div>
             @else
-                <div class="trainer-session-limit"><strong>Periode belum dimulai</strong><p>Pertemuan baru dapat dicatat mulai {{ $subscription->start_date->format('d M Y') }}.</p></div>
+                <div class="trainer-session-limit"><strong>Periode belum dimulai</strong><p>Pertemuan baru dapat dicatat mulai {{ $subscription->trainer_start_date->format('d M Y') }}.</p></div>
             @endif
         </section>
 

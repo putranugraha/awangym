@@ -26,6 +26,6 @@ class MemberPortalController extends Controller
 
     public function payments()
     {
-        return view('payments.index', ['payments' => auth()->user()->member->payments()->with('subscription.package')->latest('created_at')->paginate(15)]);
+        return view('payments.index', ['payments' => auth()->user()->member->payments()->with(['subscription.package', 'trainerAddon'])->latest('created_at')->paginate(15)]);
     }
 }

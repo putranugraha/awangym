@@ -65,6 +65,12 @@
                     @can('view assigned members')
                     <flux:sidebar.item icon="users" :href="route('trainer-members.index')" :current="request()->routeIs('trainer-members.*')">Member Binaan</flux:sidebar.item>
                     @endcan
+                    @role('personal_trainer')
+                    @can('view own salary')
+                    <flux:sidebar.item icon="banknotes" :href="route('salary.index')" :current="request()->routeIs('salary.index')" wire:navigate>Salary</flux:sidebar.item>
+                    @endcan
+                    @endrole
+                    <flux:sidebar.item icon="user-circle" :href="route('profile.show')" :current="request()->routeIs('profile.show')" wire:navigate>Profil Saya</flux:sidebar.item>
                 </flux:sidebar.group>
             </flux:sidebar.nav>
 
@@ -105,6 +111,7 @@
                     <flux:menu.separator />
 
                     <flux:menu.radio.group>
+                        <flux:menu.item :href="route('profile.show')" icon="user-circle" wire:navigate>Profil Saya</flux:menu.item>
                         <flux:menu.item :href="route('profile.edit')" icon="cog" wire:navigate>
                             {{ __('Settings') }}
                         </flux:menu.item>

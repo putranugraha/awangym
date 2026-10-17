@@ -2,7 +2,6 @@
 
 use App\Models\PaymentTransaction;
 use App\Services\MembershipPaymentService;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -47,12 +46,7 @@ new class extends Component
             return;
         }
 
-        DB::transaction(function () use ($transaction) {
-            if ($transaction->subscription) {
-                $transaction->subscription->delete();
-            }
-            $transaction->delete();
-        });
+        app(MembershipPaymentService::class)->deleteUnpaid($transaction);
 
         session()->flash('success', 'Transaksi berhasil dihapus.');
     }
@@ -84,7 +78,7 @@ new class extends Component
 
     public function with(): array
     {
-        $transactions = PaymentTransaction::with(['member.user', 'subscription.package'])
+        $transactions = PaymentTransaction::with(['member.user', 'subscription.package', 'trainerAddon'])
             ->when($this->search, fn ($query) => $query->where(function ($searchQuery) {
                 $searchQuery->where('invoice_number', 'like', "%{$this->search}%")
                     ->orWhereHas('member.user', fn ($user) => $user->where('full_name', 'like', "%{$this->search}%")
@@ -114,6 +108,7 @@ new class extends Component
 ?>
 
 <div class="awan-page">
+    @error('transaction')<div class="error-box" role="alert">{{ $message }}</div>@enderror
     <header class="resource-header">
         <div>
             <span class="eyebrow">KEUANGAN</span>
@@ -216,7 +211,8 @@ new class extends Component
                             </td>
                             <td data-label="Paket">
                                 <span class="table-primary">{{ $transaction->subscription->package->package_name }}</span>
-                                <small class="table-secondary">{{ $transaction->subscription->start_date->format('d M') }} – {{ $transaction->subscription->end_date->format('d M Y') }}</small>
+                                @if($transaction->trainer_addon_id)<span class="chip">Tambahan PT</span>@endif
+                                <small class="table-secondary">{{ ($transaction->trainerAddon?->start_date ?? $transaction->subscription->start_date)->format('d M') }} – {{ ($transaction->trainerAddon?->end_date ?? $transaction->subscription->end_date)->format('d M Y') }}</small>
                                 @if($transaction->subscription->trainer)
                                     <small class="table-secondary" style="display: block; font-weight: 500; color: var(--color-primary);">PT: {{ $transaction->subscription->trainer->user->full_name }}</small>
                                 @endif
@@ -306,6 +302,7 @@ new class extends Component
 
                 <dl class="verification-details">
                     <div><dt>Invoice</dt><dd>{{ $selectedTransaction->invoice_number }}</dd></div>
+                    <div><dt>Jenis transaksi</dt><dd>{{ $selectedTransaction->purpose_label }}</dd></div>
                     <div><dt>Paket membership</dt><dd>{{ $selectedTransaction->subscription->package->package_name }}</dd></div>
                     @if($selectedTransaction->subscription->trainer)
                         <div><dt>Trainer</dt><dd>{{ $selectedTransaction->subscription->trainer->user->full_name }}</dd></div>

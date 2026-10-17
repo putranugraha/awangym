@@ -108,7 +108,7 @@ new class extends Component
                 <tbody>
                     @forelse($transactions as $transaction)
                         <tr wire:key="report-transaction-{{ $transaction->transaction_id }}">
-                            <td data-label="Invoice"><span class="invoice-number">{{ $transaction->invoice_number }}</span></td>
+                            <td data-label="Invoice"><span class="invoice-number">{{ $transaction->invoice_number }}</span>@if($transaction->trainer_addon_id)<small class="table-secondary">Tambahan PT</small>@endif</td>
                             <td data-label="Member">
                                 <div class="member-cell">
                                     <span class="member-table-avatar">{{ $transaction->member->user->initials() }}</span>

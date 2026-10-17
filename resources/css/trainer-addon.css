@@ -1,0 +1,25 @@
+.pt-addon-panel { padding: 24px; border: 1px solid #e5e7eb; border-top: 3px solid #e52335; border-radius: 20px; background: #fff; color: #18181b; }
+.pt-addon-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 24px; }
+.pt-addon-header h2 { margin: 6px 0; font-size: 21px; font-weight: 800; }
+.pt-addon-header p, .pt-addon-help, .pt-addon-existing p { color: #626974; font-size: 13px; line-height: 1.7; }
+.pt-addon-chip { border-radius: 8px; padding: 7px 11px; background: #dcfce7; color: #166534; font-size: 12px; font-weight: 700; }
+.pt-addon-layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 24px; }
+.pt-addon-fields, .pt-addon-summary { min-width: 0; }
+.pt-addon-fields label { display: grid; align-content: start; gap: 8px; font-size: 13px; font-weight: 600; }
+.pt-addon-fields em { color: #e52335; }
+.pt-addon-fields small { font-size: 12px; font-weight: 400; color: #626974; line-height: 1.6; }
+.pt-addon-help { margin-top: 18px; }
+.pt-addon-summary { padding: 20px; border-radius: 14px; background: #fff7f8; border: 1px solid #ffe4e6; }
+.pt-addon-summary dl { display: grid; gap: 14px; margin-top: 20px; }
+.pt-addon-summary dl > div { display: flex; justify-content: space-between; gap: 14px; font-size: 12px; }
+.pt-addon-summary dt { color: #626974; }
+.pt-addon-summary dd { text-align: right; font-weight: 700; }
+.pt-addon-total { display: grid; gap: 8px; margin: 22px 0; padding-top: 18px; border-top: 1px solid #fecdd3; }
+.pt-addon-total span { font-size: 12px; font-weight: 600; }
+.pt-addon-total strong { font-size: 25px; font-weight: 800; color: #b61a2c; overflow-wrap: anywhere; }
+.pt-addon-total small { color: #626974; font-size: 12px; line-height: 1.6; }
+.pt-addon-summary button { width: 100%; }
+.pt-addon-summary button:disabled { opacity: .5; cursor: not-allowed; }
+.pt-addon-warning { margin-bottom: 16px; color: #9f1239; font-size: 12px; line-height: 1.6; }
+.pt-addon-existing { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 18px; border-radius: 12px; background: #f8fafc; overflow-wrap: anywhere; }
+@media (max-width: 800px) { .pt-addon-layout { grid-template-columns: minmax(0, 1fr); } .pt-addon-panel { padding: 18px; } }

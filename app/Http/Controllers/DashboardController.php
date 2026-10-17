@@ -32,10 +32,7 @@ class DashboardController extends Controller
             $trainer = $user->personalTrainer;
             $subscriptions = $trainer->subscriptions()
                 ->withCount('trainerSessions')
-                ->where('subscription_status', 'active')
-                ->whereDate('start_date', '<=', today())
-                ->whereDate('end_date', '>=', today())
-                ->whereHas('payment', fn ($payment) => $payment->where('payment_status', 'paid'))
+                ->currentTrainer()
                 ->get();
 
             return view('dashboard', [

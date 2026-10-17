@@ -10,7 +10,17 @@ class PaymentTransaction extends Model
 
     public $timestamps = false;
 
-    protected $fillable = ['invoice_number', 'member_id', 'subscription_id', 'amount', 'payment_method', 'payment_status', 'payment_date', 'verified_by', 'notes', 'created_at'];
+    protected $fillable = ['invoice_number', 'member_id', 'subscription_id', 'trainer_addon_id', 'amount', 'payment_method', 'payment_status', 'payment_date', 'verified_by', 'notes', 'created_at'];
+
+    public function trainerAddon()
+    {
+        return $this->belongsTo(MembershipTrainerAddon::class, 'trainer_addon_id');
+    }
+
+    public function getPurposeLabelAttribute(): string
+    {
+        return $this->trainer_addon_id ? 'Tambahan Personal Trainer' : 'Membership Gym';
+    }
 
     protected function casts(): array
     {
