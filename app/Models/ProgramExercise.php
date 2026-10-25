@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProgramExercise extends Model
 {
@@ -61,7 +62,8 @@ class ProgramExercise extends Model
         return $this->belongsTo(WorkoutProgram::class, 'program_id');
     }
 
-    public function exercise()
+    /** @return BelongsTo<Exercise, $this> */
+    public function exercise(): BelongsTo
     {
         return $this->belongsTo(Exercise::class, 'exercise_id');
     }

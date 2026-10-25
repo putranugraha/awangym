@@ -15,12 +15,11 @@ class DashboardController extends Controller
 
         if ($user->hasRole('member')) {
             $member = $user->member()->with([
-                'subscriptions' => fn ($q) => $q->with(['package', 'payment'])->latest('end_date'),
                 'payments' => fn ($q) => $q->latest('created_at')->limit(3),
                 'programs' => fn ($q) => $q->with(['program', 'trainer.user'])->where('program_status', 'active'),
             ])->firstOrFail();
             $subscription = $member->subscriptions()
-                ->with(['package', 'payment', 'trainer.user', 'trainerSessions'])
+                ->with(['package', 'payment', 'trainer.user', 'trainerSessions', 'trainerAddon'])
                 ->current()
                 ->latest('end_date')
                 ->first();
@@ -42,14 +41,25 @@ class DashboardController extends Controller
             ]);
         }
 
-        $revenueTrend = collect(range(5, 0))->map(function (int $monthsAgo) {
-            $month = now()->subMonths($monthsAgo);
+        $currentMonth = now()->startOfMonth();
+        $months = collect(range(5, 0))->map(fn (int $monthsAgo) => $currentMonth->copy()->subMonths($monthsAgo));
+        $revenueQuery = PaymentTransaction::query()
+            ->where('payment_status', 'paid')
+            ->where('payment_date', '>=', $months->first())
+            ->where('payment_date', '<', $currentMonth->copy()->addMonth());
 
+        foreach ($months as $index => $month) {
+            $revenueQuery->selectRaw(
+                "COALESCE(SUM(CASE WHEN payment_date >= ? AND payment_date < ? THEN amount ELSE 0 END), 0) AS month_{$index}",
+                [$month, $month->copy()->addMonth()]
+            );
+        }
+
+        $monthlyTotals = $revenueQuery->first();
+        $revenueTrend = $months->map(function ($month, int $index) use ($monthlyTotals) {
             return [
                 'label' => $month->translatedFormat('M'),
-                'value' => (float) PaymentTransaction::where('payment_status', 'paid')
-                    ->whereBetween('payment_date', [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()])
-                    ->sum('amount'),
+                'value' => (float) $monthlyTotals->{"month_{$index}"},
             ];
         });
         $monthlyRevenue = $revenueTrend->last()['value'];
