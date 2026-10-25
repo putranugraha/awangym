@@ -20,19 +20,22 @@
                 @error('email')<small class="auth-error">{{ $message }}</small>@enderror
             </label>
 
-            <label class="auth-field">
+            <div class="auth-field">
                 <span class="auth-label-row">
-                    <span>Password</span>
+                    <label for="login-password">Password</label>
                     @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" wire:navigate>Lupa password?</a>
                     @endif
                 </span>
                 <span class="auth-input-wrap">
                     <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
-                    <input name="password" type="password" required autocomplete="current-password" placeholder="Masukkan password">
+                    <input id="login-password" class="auth-password-input" name="password" type="password" required autocomplete="current-password" placeholder="Masukkan password">
+                    <button type="button" class="auth-password-toggle" data-password-toggle aria-controls="login-password" aria-label="Tampilkan password" aria-pressed="false">
+                        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path data-password-slash d="m3 3 18 18" hidden/></svg>
+                    </button>
                 </span>
                 @error('password')<small class="auth-error">{{ $message }}</small>@enderror
-            </label>
+            </div>
 
             <label class="auth-check">
                 <input type="checkbox" name="remember" @checked(old('remember'))>

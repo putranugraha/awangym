@@ -4,11 +4,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MemberPortalController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RevenueReportPdfController;
+use App\Http\Controllers\WorkoutChatController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login')->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('workout-chat/history', [WorkoutChatController::class, 'history'])->middleware('throttle:60,1')->name('workout-chat.history');
+    Route::post('workout-chat', WorkoutChatController::class)->middleware('throttle:12,1')->name('workout-chat.store');
     Route::get('profile', ProfileController::class)->name('profile.show');
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 

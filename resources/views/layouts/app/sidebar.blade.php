@@ -143,6 +143,8 @@
             </flux:toast.group>
         @endpersist
 
+        <x-workout-chat />
+
         @fluxScripts
     </body>
 </html>
