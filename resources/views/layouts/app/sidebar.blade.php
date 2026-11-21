@@ -143,7 +143,9 @@
             </flux:toast.group>
         @endpersist
 
+        @can('use ai chatbot')
         <x-workout-chat />
+        @endcan
 
         @fluxScripts
     </body>
