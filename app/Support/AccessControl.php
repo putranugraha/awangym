@@ -24,5 +24,6 @@ class AccessControl
         'view assigned members',
         'view own salary',
         'validate member exercises',
+        'use ai chatbot',
     ];
 }
